@@ -900,21 +900,22 @@ class BeeconMiniClient:
 
         """act:31 AP 管理/状态页：型号、版本、端口速率、运行时长、2.4G/5G 终端拆分。"""
 
-        data = await self._post_csdp(CSDP_API_PATH, {"act": ACT_AP_DETAILS, "c1150": 0})
+        data = await self._post_csdp(CSDP_API_PATH, {"act": ACT_AP_DETAILS})
 
         _LOGGER.debug("act:31 原始响应: %s", data)
 
         if data.get("errno") not in (0, None):
-
-            _LOGGER.warning("读取 AP 详情失败: %s", data)
-
+            _LOGGER.warning("act:31 errno=%s, 完整响应: %s", data.get("errno"), data)
             return []
 
         aps = data.get("aps")
+        if not isinstance(aps, list):
+            _LOGGER.warning("act:31 响应无 aps 字段或不是列表: keys=%s, 完整响应: %s", list(data.keys()), data)
+            return []
 
-        _LOGGER.debug("act:31 AP 数量: %d", len(aps) if isinstance(aps, list) else 0)
+        _LOGGER.debug("act:31 AP 数量: %d", len(aps))
 
-        return aps if isinstance(aps, list) else []
+        return aps
 
 
 

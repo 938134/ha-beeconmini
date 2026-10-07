@@ -1,8 +1,14 @@
 """BeeconMini 无线 AC 集成 —— 常量定义。"""
 
+import json
+from pathlib import Path
+
 DOMAIN = "beeconmini"
 NAME = "BeeconMini 无线 AC"
-VERSION = "1.1.3"
+
+# 版本号单一来源：manifest.json（HACS 以此识别版本，不再重复维护）
+with open(Path(__file__).parent / "manifest.json", "r", encoding="utf-8") as _f:
+    VERSION = json.load(_f)["version"]
 
 # ---- LuCI 认证与 RPC 端点 ----
 LUCI_LOGIN_PATH = "/cgi-bin/luci/"
