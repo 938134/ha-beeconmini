@@ -9,7 +9,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .base import APEntityBase
+from .base import APEntityBase, ACEntityBase
 from .coordinator import BeeconMiniCoordinator
 from .const import DOMAIN
 
