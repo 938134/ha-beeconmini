@@ -132,6 +132,9 @@
     },
     "kick_client": {
       "name": "Kick Client"
+    },
+    "rssi": {
+      "name": "Signal Strength"
     }
   }
 }

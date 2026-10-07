@@ -12,14 +12,13 @@ from homeassistant.components.sensor import (
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
-    EntityCategory,
     UnitOfInformation,
     UnitOfTemperature,
 )
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .base import ACEntityBase, APEntityBase, format_port_speed
+from .base import ACEntityBase, APEntityBase, ClientEntityBase, format_port_speed
 from .coordinator import BeeconMiniCoordinator
 from .const import DOMAIN
 from .model import ACState
@@ -85,7 +84,6 @@ AC_SENSORS: tuple[ACSensorDescription, ...] = (
         device_class=SensorDeviceClass.DATA_SIZE,
         native_unit_of_measurement=UnitOfInformation.BYTES,
         state_class=SensorStateClass.TOTAL_INCREASING,
-        entity_category=EntityCategory.DIAGNOSTIC,
         suggested_unit_of_measurement=UnitOfInformation.GIGABYTES,
         value_fn=lambda s: s.wan_rx_bytes,
     ),
@@ -95,7 +93,6 @@ AC_SENSORS: tuple[ACSensorDescription, ...] = (
         device_class=SensorDeviceClass.DATA_SIZE,
         native_unit_of_measurement=UnitOfInformation.BYTES,
         state_class=SensorStateClass.TOTAL_INCREASING,
-        entity_category=EntityCategory.DIAGNOSTIC,
         suggested_unit_of_measurement=UnitOfInformation.GIGABYTES,
         value_fn=lambda s: s.wan_tx_bytes,
     ),
@@ -171,6 +168,23 @@ async def async_setup_entry(
     _add_new_aps()
     entry.async_on_unload(coordinator.async_add_listener(_add_new_aps))
 
+    # 动态终端 RSSI 传感器
+    known_stas: set[str] = set()
+
+    @callback
+    def _add_new_clients() -> None:
+        new_entities: list[SensorEntity] = []
+        for sta in coordinator.data.stas:
+            if sta.mac in known_stas:
+                continue
+            known_stas.add(sta.mac)
+            new_entities.append(BeeconClientRSSISensor(coordinator, sta.mac))
+        if new_entities:
+            async_add_entities(new_entities)
+
+    _add_new_clients()
+    entry.async_on_unload(coordinator.async_add_listener(_add_new_clients))
+
 
 class BeeconACSensor(ACEntityBase, SensorEntity):
     """AC 主机传感器。"""
@@ -193,7 +207,6 @@ class BeeconRoamingPolicySensor(ACEntityBase, SensorEntity):
     _attr_name = "漫游策略"
     _attr_icon = "mdi:router-network"
     _attr_translation_key = "roaming_policy"
-    _attr_entity_category = EntityCategory.DIAGNOSTIC
 
     def __init__(self, coordinator: BeeconMiniCoordinator) -> None:
         super().__init__(coordinator)
@@ -316,7 +329,6 @@ class BeeconAPPortSpeedSensor(APEntityBase, SensorEntity):
     _attr_name = "端口速率"
     _attr_icon = "mdi:ethernet-cable"
     _attr_translation_key = "ap_port_speed"
-    _attr_entity_category = EntityCategory.DIAGNOSTIC
 
     def __init__(self, coordinator: BeeconMiniCoordinator, ap_mac: str) -> None:
         super().__init__(coordinator, ap_mac)
@@ -337,7 +349,7 @@ class BeeconAPPortSpeedSensor(APEntityBase, SensorEntity):
         return {
             "协商速率": format_port_speed(ap.port_speed_code),
             "端口能力": format_port_speed(ap.port_cap_code),
-            "端口插线": ap.port_plug,
+            "端口插线": "未知" if ap.port_plug is None else ("已连接" if ap.port_plug else "已拔出"),
         }
 
 
@@ -349,7 +361,6 @@ class BeeconAPUptimeSensor(APEntityBase, SensorEntity):
     _attr_native_unit_of_measurement = "s"
     _attr_state_class = SensorStateClass.MEASUREMENT
     _attr_translation_key = "ap_uptime"
-    _attr_entity_category = EntityCategory.DIAGNOSTIC
 
     def __init__(self, coordinator: BeeconMiniCoordinator, ap_mac: str) -> None:
         super().__init__(coordinator, ap_mac)
@@ -373,4 +384,43 @@ class BeeconAPUptimeSensor(APEntityBase, SensorEntity):
             "运行天数": days,
             "运行小时": hours,
             "运行分钟": minutes,
+        }
+
+
+class BeeconClientRSSISensor(ClientEntityBase, SensorEntity):
+    """无线终端的 RSSI 信号强度传感器。
+
+    让终端在传感器面板可见，设备详情页里保留踢除按钮。
+    """
+
+    _attr_name = "信号强度"
+    _attr_device_class = SensorDeviceClass.SIGNAL_STRENGTH
+    _attr_native_unit_of_measurement = "dBm"
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_translation_key = "rssi"
+
+    def __init__(self, coordinator: BeeconMiniCoordinator, sta_mac: str) -> None:
+        super().__init__(coordinator, sta_mac)
+        self._attr_unique_id = f"{sta_mac}_rssi"
+
+    @property
+    def native_value(self) -> int | None:
+        return self._sta.rssi if self._sta else None
+
+    @property
+    def extra_state_attributes(self) -> dict[str, object]:
+        sta = self._sta
+        if sta is None:
+            return {}
+        return {
+            "名称": sta.display_name,
+            "ip": sta.ip,
+            "mac": sta.mac,
+            "所属AP": sta.ap_name or sta.ap_mac,
+            "频段": sta.band,
+            "信道": sta.channel,
+            "协议": sta.phy_mode,
+            "Tx_Mbps": sta.tx_rate,
+            "Rx_Mbps": sta.rx_rate,
+            "MLO": sta.mlo,
         }

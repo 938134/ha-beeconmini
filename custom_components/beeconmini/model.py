@@ -31,14 +31,14 @@ class BeeconAP:
     ap_ip: str = ""              # a04 AP IP
     channel_24: int | None = None  # r02
     channel_5: int | None = None   # r12
-    power_24_code: int = -1        # r03
-    power_5_code: int = -1         # r13
-    port_speed_code: int = -1      # s07
-    port_cap_code: int = -1        # a041
-    port_plug: bool = False        # a0100
+    power_24_code: int | None = None  # r03
+    power_5_code: int | None = None  # r13
+    port_speed_code: int | None = None  # s07
+    port_cap_code: int | None = None  # a041
+    port_plug: bool | None = None    # a0100
     uptime_seconds: int = 0        # a01
-    users_24: int = 0              # a056
-    users_5: int = 0               # a057
+    users_24: int | None = None    # a056
+    users_5: int | None = None    # a057
 
     @property
     def total_clients(self) -> int:
@@ -70,14 +70,15 @@ class BeeconAP:
         self.ap_ip = str(raw.get("a04") or "").strip()
         self.channel_24 = _int_or_none(raw.get("r02"))
         self.channel_5 = _int_or_none(raw.get("r12"))
-        self.power_24_code = _int(raw.get("r03"))
-        self.power_5_code = _int(raw.get("r13"))
-        self.port_speed_code = _int(raw.get("s07"))
-        self.port_cap_code = _int(raw.get("a041"))
-        self.port_plug = _int(raw.get("a0100")) != 0
+        self.power_24_code = _int_or_none(raw.get("r03"))
+        self.power_5_code = _int_or_none(raw.get("r13"))
+        self.port_speed_code = _int_or_none(raw.get("s07"))
+        self.port_cap_code = _int_or_none(raw.get("a041"))
+        raw_plug = _int_or_none(raw.get("a0100"))
+        self.port_plug = None if raw_plug is None else raw_plug != 0
         self.uptime_seconds = _int(raw.get("a01"))
-        self.users_24 = _int(raw.get("a056"))
-        self.users_5 = _int(raw.get("a057"))
+        self.users_24 = _int_or_none(raw.get("a056"))
+        self.users_5 = _int_or_none(raw.get("a057"))
 
 
 BAND_MAP = {
