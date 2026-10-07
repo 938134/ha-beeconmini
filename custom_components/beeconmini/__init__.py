@@ -1,13 +1,14 @@
 """BeeconMini 无线 AC 集成入口。
 
-平台：sensor / binary_sensor
+平台：sensor / binary_sensor / button
 服务：kick_client / reboot_aps
 
-设备布局：
-- AC 主设备：CPU/内存/连接数、WAN 收发流量、无线/有线终端数
-- 每台 AP 独立成设备：在线状态 + 接入终端数 + 终端清单
+三层设备层级：
+  AC 主设备 → 每台 AP（via=AC） → 每台终端（via=AP）
 
-所有控制操作通过域级服务触发（避免实体数量随终端/AP 数膨胀）。
+- AC：CPU/内存/连接数、WAN 收发流量、终端数、AP 状态、漫游剔除策略
+- AP：在线状态、信道、功率、用户数、端口速率、运行时长、IP、型号、重启按钮
+- 终端：RSSI 信号强度、剔除按钮
 """
 from __future__ import annotations
 

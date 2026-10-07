@@ -9,7 +9,13 @@ from homeassistant.core import HomeAssistant, ServiceCall, callback
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import config_validation as cv
 
-from .api import BeeconMiniAuthError, BeeconMiniApiError, is_mac, normalize_mac
+from .api import (
+    BeeconMiniApiError,
+    BeeconMiniAuthError,
+    BeeconMiniConnectionError,
+    is_mac,
+    normalize_mac,
+)
 from .const import DOMAIN, SERVICE_KICK_CLIENT, SERVICE_REBOOT_APS
 from .coordinator import BeeconMiniCoordinator
 
@@ -52,7 +58,7 @@ async def _handle_kick_client(call: ServiceCall) -> None:
         )
     try:
         ok = await coordinator.client.async_deauth_client(mac)
-    except (BeeconMiniAuthError, BeeconMiniApiError) as err:
+    except (BeeconMiniAuthError, BeeconMiniApiError, BeeconMiniConnectionError) as err:
         raise HomeAssistantError(f"剔除终端失败：{err}") from err
     if ok:
         _LOGGER.info("已剔除终端：%s", mac)
@@ -80,7 +86,7 @@ async def _handle_reboot_aps(call: ServiceCall) -> None:
                 enabled, day, data["hour"], data["minute"]
             )
             desc = f"day={day} {data['hour']:02d}:{data['minute']:02d}"
-    except (BeeconMiniAuthError, BeeconMiniApiError) as err:
+    except (BeeconMiniAuthError, BeeconMiniApiError, BeeconMiniConnectionError) as err:
         raise HomeAssistantError(f"安排 AP 重启失败：{err}") from err
 
     if ok:
@@ -100,4 +106,3 @@ def async_register_services(hass: HomeAssistant) -> None:
     for name, handler, schema in services:
         if not hass.services.has_service(DOMAIN, name):
             hass.services.async_register(DOMAIN, name, handler, schema=schema)
-

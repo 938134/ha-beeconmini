@@ -30,23 +30,13 @@ _LOGGER = logging.getLogger(__name__)
 class BeeconMiniCoordinator(DataUpdateCoordinator[ACState]):
     """轮询路由器，聚合 AC 全量状态。"""
 
-    def __init__(
-        self,
-        hass: HomeAssistant,
-        client: BeeconMiniClient,
-        scan_interval: int = DEFAULT_SCAN_INTERVAL,
-    ) -> None:
-        super().__init__(
-            hass,
-            _LOGGER,
-            name=DOMAIN,
-            update_interval=timedelta(seconds=scan_interval),
-        )
+    def __init__(self, hass: HomeAssistant, client: BeeconMiniClient, scan_interval: int = DEFAULT_SCAN_INTERVAL) -> None:
+        super().__init__(hass, _LOGGER, name=DOMAIN, update_interval=timedelta(seconds=scan_interval))
         self.client = client
 
     async def _async_update_data(self) -> ACState:
         """并发拉取所有数据源；核心字段失败即整轮失败，边缘字段降级为空。"""
-        # 四个必须成功的基础查询
+        # 阶段 1：核心数据（4 路，任一失败即 UpdateFailed）
         product, status, users, wan_stats = await asyncio.gather(
             self.client.async_get_product_info(),
             self.client.async_get_status(),
@@ -54,16 +44,7 @@ class BeeconMiniCoordinator(DataUpdateCoordinator[ACState]):
             self.client.async_get_wan_stats(),
             return_exceptions=True,
         )
-        first = product if not isinstance(product, BaseException) else (
-            status if not isinstance(status, BaseException) else users
-        )
-        # 只要有一个真正抛了业务异常（不是超时/连接）就当作 UpdateFailed
-        for result, action in (
-            (product, "产品信息"),
-            (status, "运行状态"),
-            (users, "在线终端"),
-            (wan_stats, "WAN 流量"),
-        ):
+        for result, action in ((product, "产品信息"), (status, "运行状态"), (users, "在线终端"), (wan_stats, "WAN 流量")):
             if isinstance(result, BeeconMiniAuthError):
                 raise UpdateFailed(f"认证失败：{result}") from result
             if isinstance(result, (BeeconMiniConnectionError, BeeconMiniApiError)):
@@ -73,7 +54,7 @@ class BeeconMiniCoordinator(DataUpdateCoordinator[ACState]):
         users = users or []
         wan_stats = wan_stats or {}
 
-        # 边缘数据：stas + AP 快照 + act:31 详情 + 漫游策略
+        # 阶段 2：边缘数据（4 路，失败降级为空）
         stas, aps_snapshot, ap_details, rpolicys = await asyncio.gather(
             self.client.async_get_stas(),
             self.client.async_get_json_snapshot(JSON_SNAPSHOT_FILES["aps"]),
@@ -95,20 +76,10 @@ class BeeconMiniCoordinator(DataUpdateCoordinator[ACState]):
             rpolicys = None
 
         state = build_state(
-            product=product,
-            status=status,
-            users_raw=users,
-            apinfos_raw=aps_snapshot,
-            wan_stats=wan_stats,
-            stas_raw=stas,
-            ap_details_raw=ap_details,
-            rpolicys_raw=rpolicys,
+            product=product, status=status, users_raw=users, apinfos_raw=aps_snapshot,
+            wan_stats=wan_stats, stas_raw=stas, ap_details_raw=ap_details, rpolicys_raw=rpolicys,
         )
-        _LOGGER.debug(
-            "AC 状态刷新：%d 台 AP / %d 台终端",
-            len(state.aps),
-            len(state.users),
-        )
+        _LOGGER.debug("AC 状态刷新：%d 台 AP / %d 台终端", len(state.aps), len(state.users))
         return state
 
     async def async_shutdown(self) -> None:

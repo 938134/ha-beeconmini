@@ -9,7 +9,11 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .api import BeeconMiniAuthError, BeeconMiniApiError
+from .api import (
+    BeeconMiniApiError,
+    BeeconMiniAuthError,
+    BeeconMiniConnectionError,
+)
 from .base import APEntityBase, ClientEntityBase
 from .coordinator import BeeconMiniCoordinator
 from .const import DOMAIN
@@ -79,8 +83,8 @@ class BeeconAPRebootButton(APEntityBase, ButtonEntity):
         client = self.coordinator.client
         try:
             ok = await client.async_reboot_all_aps()
-        except (BeeconMiniAuthError, BeeconMiniApiError) as err:
-            raise HomeAssistantError(f"重启 AP 失败：{err}" ) from err
+        except (BeeconMiniAuthError, BeeconMiniApiError, BeeconMiniConnectionError) as err:
+            raise HomeAssistantError(f"重启 AP 失败：{err}") from err
         if not ok:
             raise HomeAssistantError("重启 AP 未确认成功")
         _LOGGER.info("AP 重启已安排：1 分钟后")
@@ -108,7 +112,7 @@ class BeeconClientKickButton(ClientEntityBase, ButtonEntity):
         mac = self._sta_mac
         try:
             ok = await client.async_deauth_client(mac)
-        except (BeeconMiniAuthError, BeeconMiniApiError) as err:
+        except (BeeconMiniAuthError, BeeconMiniApiError, BeeconMiniConnectionError) as err:
             raise HomeAssistantError(f"剔除终端失败：{err}") from err
         if ok:
             _LOGGER.info("已剔除终端：%s", mac)

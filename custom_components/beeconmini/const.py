@@ -2,7 +2,7 @@
 
 DOMAIN = "beeconmini"
 NAME = "BeeconMini 无线 AC"
-VERSION = "1.1.0"
+VERSION = "1.1.2"
 
 # ---- LuCI 认证与 RPC 端点 ----
 LUCI_LOGIN_PATH = "/cgi-bin/luci/"
