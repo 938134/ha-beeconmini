@@ -374,7 +374,9 @@ class BeeconAPModelSensor(APEntityBase, SensorEntity):
     @property
     def native_value(self) -> str | None:
         ap = self._ap
-        return ap.ap_model or None if ap else None
+        if ap is None:
+            return None
+        return ap.ap_model or None
 
 
 class BeeconAPConnectedClientsSensor(APEntityBase, SensorEntity):

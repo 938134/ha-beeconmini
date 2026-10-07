@@ -111,9 +111,9 @@ def _build_ap_connections(ap_mac: str, ap) -> set[tuple[str, str]]:
             conns.add(("ip", ip)) 
     return conns 
 
-def format_power_level(code: int) -> str:
+def format_power_level(code: int | None) -> str:
     """功率档码转文案。"""
-    if code < 0:
+    if code is None or code < 0:
         return "未知"
     return POWER_LEVELS.get(code, f"档 {code}")
 
