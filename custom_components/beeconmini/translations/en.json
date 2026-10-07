@@ -17,9 +17,7 @@
       "cannot_connect": "Cannot reach the router, check address and network",
       "unknown": "Unknown error, see logs"
     },
-    "abort": {
-      "already_configured": "This router is already configured"
-    }
+    "abort": { "already_configured": "This router is already configured" }
   },
   "options": {
     "step": {
@@ -38,26 +36,22 @@
       "cpu_usage": { "name": "CPU usage" },
       "mem_usage": { "name": "Memory usage" },
       "conn_num": { "name": "Connections" },
-      "client_count": { "name": "Clients (wired/wired)" },
+      "client_count": { "name": "Clients" },
       "wan_rx": { "name": "WAN received" },
       "wan_tx": { "name": "WAN sent" },
       "ap_status": { "name": "AP status" }
     },
-    "binary_sensor": {
-      "ap_online": { "name": "Online" }
-    }
+    "binary_sensor": { "ap_online": { "name": "Online" } }
   },
   "services": {
     "kick_client": {
       "name": "Kick client",
-      "description": "Kick a wireless client by MAC address (vendor-native, one-shot deauth).",
-      "fields": {
-        "mac": { "name": "MAC address", "description": "Target client MAC, e.g. aa:bb:cc:dd:ee:ff" }
-      }
+      "description": "Kick a wireless client by MAC address.",
+      "fields": { "mac": { "name": "MAC address", "description": "Target client MAC, e.g. aa:bb:cc:dd:ee:ff" } }
     },
     "reboot_aps": {
       "name": "Reboot managed APs",
-      "description": "Omit hour/minute for immediate reboot; otherwise write a scheduled reboot plan.",
+      "description": "Omit hour/minute for immediate reboot.",
       "fields": {
         "hour": { "name": "Hour", "description": "Omit for immediate reboot; 0-23" },
         "minute": { "name": "Minute", "description": "Omit for immediate reboot; 0-59" },
@@ -67,12 +61,15 @@
     }
   },
   "sensor": {
-    "ap_clients": { "name": "Connected Clients" },
-    "ap_clients_24": { "name": "2.4G Clients" },
-    "ap_clients_5": { "name": "5G Clients" },
+    "ap_channel": { "name": "Channel" },
+    "ap_power": { "name": "Power Level" },
+    "ap_clients": { "name": "Clients" },
     "ap_port_speed": { "name": "Port Speed" },
     "ap_uptime": { "name": "Uptime" },
     "ap_port_plug": { "name": "Port Plug" },
+    "ap_ip": { "name": "IP Address" },
+    "ap_model": { "name": "Model" },
+    "ap_connected_clients": { "name": "Connected Clients" },
     "reboot_ap": { "name": "Reboot AP" },
     "kick_client": { "name": "Kick Client" },
     "rssi": { "name": "Signal Strength" }

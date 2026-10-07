@@ -17,9 +17,7 @@
       "cannot_connect": "无法连接到路由器，请检查地址与网络",
       "unknown": "未知错误，请查看日志"
     },
-    "abort": {
-      "already_configured": "该路由器已配置"
-    }
+    "abort": { "already_configured": "该路由器已配置" }
   },
   "options": {
     "step": {
@@ -43,17 +41,13 @@
       "wan_tx": { "name": "WAN 发送流量" },
       "ap_status": { "name": "AP 状态" }
     },
-    "binary_sensor": {
-      "ap_online": { "name": "在线状态" }
-    }
+    "binary_sensor": { "ap_online": { "name": "在线状态" } }
   },
   "services": {
     "kick_client": {
       "name": "剔除终端",
       "description": "按 MAC 地址剔除无线终端（厂商原生，一次性断连）。",
-      "fields": {
-        "mac": { "name": "MAC 地址", "description": "目标终端 MAC，示例 aa:bb:cc:dd:ee:ff" }
-      }
+      "fields": { "mac": { "name": "MAC 地址", "description": "目标终端 MAC，示例 aa:bb:cc:dd:ee:ff" } }
     },
     "reboot_aps": {
       "name": "重启纳管 AP",
@@ -67,12 +61,15 @@
     }
   },
   "sensor": {
-    "ap_clients": { "name": "接入终端数" },
-    "ap_clients_24": { "name": "2.4G 终端数" },
-    "ap_clients_5": { "name": "5G 终端数" },
+    "ap_channel": { "name": "信道" },
+    "ap_power": { "name": "功率" },
+    "ap_clients": { "name": "用户数" },
     "ap_port_speed": { "name": "端口速率" },
     "ap_uptime": { "name": "运行时长" },
     "ap_port_plug": { "name": "端口插线" },
+    "ap_ip": { "name": "IP 地址" },
+    "ap_model": { "name": "型号" },
+    "ap_connected_clients": { "name": "已连接设备" },
     "reboot_ap": { "name": "重启 AP" },
     "kick_client": { "name": "剔除终端" },
     "rssi": { "name": "信号强度" }
