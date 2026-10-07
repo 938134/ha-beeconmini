@@ -1,0 +1,6 @@
+{
+  "name": "BeeconMini AC",
+  "render_readme": true,
+  "homeassistant_version": "2024.1.0",
+  "country": "CN"
+}

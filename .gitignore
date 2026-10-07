@@ -1,0 +1,132 @@
+# ============================================
+# BeeconMini - Home Assistant Custom Integration
+# ============================================
+
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+.eggs/
+dist/
+build/
+develop-eggs/
+downloads/
+eggs/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.manifest
+*.spec
+.installed.cfg
+lib/
+lib64/
+
+# ---- Virtual Environments ----
+.venv/
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.python-version
+
+# ---- IDE / Editor ----
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+*.sublime-workspace
+*.sublime-project
+.project
+.pydevproject
+.settings/
+.compass/
+.DS_Store
+Thumbs.db
+
+# ---- Testing / Coverage ----
+.coverage
+.coverage.*
+.coverage.html
+htmlcov/
+.tox/
+.nox/
+.cache/
+.hypothesis/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.dmypy.json
+.dmypy/
+reports/
+coverage.xml
+*.cover
+
+# ---- Home Assistant 开发 ----
+homeassistant_custom_components/
+ha/
+.config/
+storage/
+core/
+custom_components/.DS_Store
+
+# ---- 项目本地开发备份 ----
+.backup_*/
+*.bak
+*.orig
+*.v2.*
+*.v3.*
+
+# ---- 日志 / 临时文件 ----
+*.log
+logs/
+tmp/
+temp/
+*.tmp
+*.temp
+*.local
+.cache/
+
+# ---- CI / 构建产物 ----
+target/
+*.whl
+*.tar.gz
+*.zip
+releases/
+
+# ---- 敏感文件 ----
+.env
+.env.*
+*.pem
+*.key
+secrets.yaml
+config.yaml
+configuration.yaml
+
+# ---- OS ----
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# ---- 编辑器 / 系统忽略 ----
+node_modules/
+package.json
+package-lock.json
+yarn.lock
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
