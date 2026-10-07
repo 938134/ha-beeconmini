@@ -144,8 +144,18 @@ async def async_setup_entry(
     # AC 主机指标
     async_add_entities([BeeconACSensor(coordinator, d) for d in AC_SENSORS])
 
-    # 漫游策略（1 个综合 text sensor）
-    async_add_entities([BeeconRoamingPolicySensor(coordinator)])
+    # 漫游策略（7 个独立 sensor + 2 个 binary_sensor 在 binary_sensor.py）
+    async_add_entities([
+        BeeconRoamingR24Sensor(coordinator),
+        BeeconRoamingR5Sensor(coordinator),
+        BeeconRoamingR24EvictionSensor(coordinator),
+        BeeconRoamingR5EvictionSensor(coordinator),
+        BeeconRoamingLoadBalanceSensor(coordinator),
+        BeeconRoamingR24MaxSensor(coordinator),
+        BeeconRoamingR5MaxSensor(coordinator),
+    ])
+
+
 
     # 动态 AP 传感器
     known_aps: set[str] = set()
@@ -195,43 +205,155 @@ class BeeconACSensor(ACEntityBase, SensorEntity):
         super().__init__(coordinator)
         self.entity_description = description
         self._attr_unique_id = f"{coordinator.config_entry.entry_id}_{description.key}"
+        # Hardcode name to avoid translation_key fallback issues
+        name_map = {
+            "cpu_temp": "CPU 温度",
+            "cpu_usage": "CPU 占用",
+            "mem_usage": "内存占用",
+            "conn_num": "连接数",
+            "wifi_clients": "无线终端数",
+            "wired_clients": "有线终端数",
+            "wan_rx": "WAN 接收流量",
+            "wan_tx": "WAN 发送流量",
+            "ap_total": "AP 总数",
+            "ap_online": "AP 在线数",
+        }
+        self._attr_name = name_map.get(description.key, description.key)
 
     @property
     def native_value(self) -> float | int | str | None:
         return self.entity_description.value_fn(self.coordinator.data)
 
 
-class BeeconRoamingPolicySensor(ACEntityBase, SensorEntity):
-    """漫游策略综合传感器（1 个 text sensor + attributes 挂全部字段）。"""
+class BeeconRoamingR24Sensor(ACEntityBase, SensorEntity):
+    """2.4G 漫游触发阈值。"""
 
-    _attr_name = "漫游策略"
-    _attr_icon = "mdi:router-network"
-    _attr_translation_key = "roaming_policy"
+    _attr_name = "2.4G 漫游触发"
+    _attr_native_unit_of_measurement = "dBm"
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_icon = "mdi:wifi-24ghz"
+    _attr_translation_key = "roaming_r24_trigger"
 
     def __init__(self, coordinator: BeeconMiniCoordinator) -> None:
         super().__init__(coordinator)
-        self._attr_unique_id = f"{coordinator.config_entry.entry_id}_roaming_policy"
+        self._attr_unique_id = f"{coordinator.config_entry.entry_id}_roaming_r24_trigger"
 
     @property
-    def native_value(self) -> str:
-        return _roaming_state(self.coordinator.data)
-
-    @property
-    def extra_state_attributes(self) -> dict[str, object]:
+    def native_value(self) -> float | None:
         rp = self.coordinator.data.rpolicy
-        if not rp:
-            return {}
-        return {
-            "r24_roaming_trigger_dbm": rp.r24_roaming_trigger_dbm,
-            "r5_roaming_trigger_dbm": rp.r5_roaming_trigger_dbm,
-            "r24_eviction_threshold_dbm": rp.r24_eviction_threshold_dbm,
-            "r5_eviction_threshold_dbm": rp.r5_eviction_threshold_dbm,
-            "load_balance_rssi_dbm": rp.load_balance_rssi_dbm,
-            "r24_max_clients_per_radio": rp.r24_max_clients_per_radio,
-            "r5_max_clients_per_radio": rp.r5_max_clients_per_radio,
-            "r24_eviction_enabled": rp.r24_eviction_enabled,
-            "r5_eviction_enabled": rp.r5_eviction_enabled,
-        }
+        return rp.r24_roaming_trigger_dbm if rp else None
+
+
+class BeeconRoamingR5Sensor(ACEntityBase, SensorEntity):
+    """5G 漫游触发阈值。"""
+
+    _attr_name = "5G 漫游触发"
+    _attr_native_unit_of_measurement = "dBm"
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_icon = "mdi:wifi-5ghz"
+    _attr_translation_key = "roaming_r5_trigger"
+
+    def __init__(self, coordinator: BeeconMiniCoordinator) -> None:
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{coordinator.config_entry.entry_id}_roaming_r5_trigger"
+
+    @property
+    def native_value(self) -> float | None:
+        rp = self.coordinator.data.rpolicy
+        return rp.r5_roaming_trigger_dbm if rp else None
+
+
+class BeeconRoamingR24EvictionSensor(ACEntityBase, SensorEntity):
+    """2.4G 剔除低速终端阈值。"""
+
+    _attr_name = "2.4G 剔除阈值"
+    _attr_native_unit_of_measurement = "dBm"
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_icon = "mdi:wifi-off"
+    _attr_translation_key = "roaming_r24_eviction"
+
+    def __init__(self, coordinator: BeeconMiniCoordinator) -> None:
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{coordinator.config_entry.entry_id}_roaming_r24_eviction"
+
+    @property
+    def native_value(self) -> float | None:
+        rp = self.coordinator.data.rpolicy
+        return rp.r24_eviction_threshold_dbm if rp else None
+
+
+class BeeconRoamingR5EvictionSensor(ACEntityBase, SensorEntity):
+    """5G 剔除低速终端阈值。"""
+
+    _attr_name = "5G 剔除阈值"
+    _attr_native_unit_of_measurement = "dBm"
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_icon = "mdi:wifi-off"
+    _attr_translation_key = "roaming_r5_eviction"
+
+    def __init__(self, coordinator: BeeconMiniCoordinator) -> None:
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{coordinator.config_entry.entry_id}_roaming_r5_eviction"
+
+    @property
+    def native_value(self) -> float | None:
+        rp = self.coordinator.data.rpolicy
+        return rp.r5_eviction_threshold_dbm if rp else None
+
+
+class BeeconRoamingLoadBalanceSensor(ACEntityBase, SensorEntity):
+    """负载均衡 RSSI 阈值。"""
+
+    _attr_name = "负载均衡 RSSI"
+    _attr_native_unit_of_measurement = "dBm"
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_icon = "mdi:scale-balance"
+    _attr_translation_key = "roaming_load_balance"
+
+    def __init__(self, coordinator: BeeconMiniCoordinator) -> None:
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{coordinator.config_entry.entry_id}_roaming_load_balance"
+
+    @property
+    def native_value(self) -> float | None:
+        rp = self.coordinator.data.rpolicy
+        return rp.load_balance_rssi_dbm if rp else None
+
+
+class BeeconRoamingR24MaxSensor(ACEntityBase, SensorEntity):
+    """2.4G 单射频终端数上限。"""
+
+    _attr_name = "2.4G 终端上限"
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_icon = "mdi:wifi-24ghz"
+    _attr_translation_key = "roaming_r24_max"
+
+    def __init__(self, coordinator: BeeconMiniCoordinator) -> None:
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{coordinator.config_entry.entry_id}_roaming_r24_max"
+
+    @property
+    def native_value(self) -> int | None:
+        rp = self.coordinator.data.rpolicy
+        return rp.r24_max_clients_per_radio if rp else None
+
+
+class BeeconRoamingR5MaxSensor(ACEntityBase, SensorEntity):
+    """5G 单射频终端数上限。"""
+
+    _attr_name = "5G 终端上限"
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_icon = "mdi:wifi-5ghz"
+    _attr_translation_key = "roaming_r5_max"
+
+    def __init__(self, coordinator: BeeconMiniCoordinator) -> None:
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{coordinator.config_entry.entry_id}_roaming_r5_max"
+
+    @property
+    def native_value(self) -> int | None:
+        rp = self.coordinator.data.rpolicy
+        return rp.r5_max_clients_per_radio if rp else None
 
 
 class BeeconAPClientSensor(APEntityBase, SensorEntity):

@@ -135,6 +135,35 @@
     },
     "rssi": {
       "name": "Signal Strength"
+    },
+    "roaming_r24_trigger": {
+      "name": "2.4G Roaming Trigger"
+    },
+    "roaming_r5_trigger": {
+      "name": "5G Roaming Trigger"
+    },
+    "roaming_r24_eviction": {
+      "name": "2.4G Eviction Threshold"
+    },
+    "roaming_r5_eviction": {
+      "name": "5G Eviction Threshold"
+    },
+    "roaming_load_balance": {
+      "name": "Load Balance RSSI"
+    },
+    "roaming_r24_max": {
+      "name": "2.4G Max Clients"
+    },
+    "roaming_r5_max": {
+      "name": "5G Max Clients"
+    }
+  },
+  "binary_sensor": {
+    "roaming_r24_eviction_enabled": {
+      "name": "2.4G Eviction Enabled"
+    },
+    "roaming_r5_eviction_enabled": {
+      "name": "5G Eviction Enabled"
     }
   }
 }

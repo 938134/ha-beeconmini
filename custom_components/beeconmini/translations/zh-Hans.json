@@ -135,6 +135,35 @@
     },
     "rssi": {
       "name": "信号强度"
+    },
+    "roaming_r24_trigger": {
+      "name": "2.4G 漫游触发"
+    },
+    "roaming_r5_trigger": {
+      "name": "5G 漫游触发"
+    },
+    "roaming_r24_eviction": {
+      "name": "2.4G 剔除阈值"
+    },
+    "roaming_r5_eviction": {
+      "name": "5G 剔除阈值"
+    },
+    "roaming_load_balance": {
+      "name": "负载均衡 RSSI"
+    },
+    "roaming_r24_max": {
+      "name": "2.4G 终端上限"
+    },
+    "roaming_r5_max": {
+      "name": "5G 终端上限"
+    }
+  },
+  "binary_sensor": {
+    "roaming_r24_eviction_enabled": {
+      "name": "2.4G 剔除开关"
+    },
+    "roaming_r5_eviction_enabled": {
+      "name": "5G 剔除开关"
     }
   }
 }

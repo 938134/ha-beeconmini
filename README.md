@@ -13,11 +13,15 @@ Home Assistant 集成：读取 BeeconMini 无线 AC（SEED AC1/AC2/AC3/AC5）的
 
 ## 提供的实体
 
-**AC 主设备（1 台，12 个传感器）**
+**AC 主设备（1 台，19 个实体）**
 - sensor：CPU 温度 / CPU 占用 / 内存占用 / 连接数 / 无线终端数 / 有线终端数
 - sensor：WAN 接收流量 / WAN 发送流量（累计）
 - sensor：AP 总数 / AP 在线数
-- sensor：漫游策略（综合 text，attributes 含 2.4G/5G 漫游阈值、剔除阈值、负载均衡、单射频上限）
+- sensor：2.4G 漫游触发 / 5G 漫游触发（dBm）
+- sensor：2.4G 剔除阈值 / 5G 剔除阈值（dBm）
+- sensor：负载均衡 RSSI（dBm）
+- sensor：2.4G 终端上限 / 5G 终端上限（个）
+- binary_sensor：2.4G 剔除开关 / 5G 剔除开关
 
 **每台纳管 AP（N 台，7 个实体）**
 - binary_sensor：在线状态

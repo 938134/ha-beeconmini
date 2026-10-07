@@ -83,3 +83,39 @@ class BeeconAPPortPlugSensor(APEntityBase, BinarySensorEntity):
     def is_on(self) -> bool:
         ap = self._ap
         return bool(ap and ap.port_plug)
+
+
+class BeeconRoamingR24EvictionBinarySensor(ACEntityBase, BinarySensorEntity):
+    """2.4G 剔除低速终端开关。"""
+
+    _attr_name = "2.4G 剔除开关"
+    _attr_device_class = BinarySensorDeviceClass.RUNNING
+    _attr_icon = "mdi:wifi-off"
+    _attr_translation_key = "roaming_r24_eviction_enabled"
+
+    def __init__(self, coordinator: BeeconMiniCoordinator) -> None:
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{coordinator.config_entry.entry_id}_roaming_r24_eviction_enabled"
+
+    @property
+    def is_on(self) -> bool:
+        rp = self.coordinator.data.rpolicy
+        return bool(rp and rp.r24_eviction_enabled)
+
+
+class BeeconRoamingR5EvictionBinarySensor(ACEntityBase, BinarySensorEntity):
+    """5G 剔除低速终端开关。"""
+
+    _attr_name = "5G 剔除开关"
+    _attr_device_class = BinarySensorDeviceClass.RUNNING
+    _attr_icon = "mdi:wifi-off"
+    _attr_translation_key = "roaming_r5_eviction_enabled"
+
+    def __init__(self, coordinator: BeeconMiniCoordinator) -> None:
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{coordinator.config_entry.entry_id}_roaming_r5_eviction_enabled"
+
+    @property
+    def is_on(self) -> bool:
+        rp = self.coordinator.data.rpolicy
+        return bool(rp and rp.r5_eviction_enabled)
