@@ -120,6 +120,8 @@ def format_power_level(code: int | None) -> str:
 
 def format_port_speed(code: int | None) -> str:
     """端口速率码转文案。"""
-    if code is None or code < 0 or code == 255:
+    if code is None or code < 0:
+        return "未知"
+    if code == 255:
         return "Auto"
     return PORT_SPEED_MAP.get(code, f"{code}")
