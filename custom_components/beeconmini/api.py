@@ -58,6 +58,8 @@ from .const import (
 
     ACT_STA_GET,
 
+    ACT_AP_DETAILS,
+
     CSDP_API_PATH,
 
     CSDP_UCI,
@@ -898,7 +900,7 @@ class BeeconMiniClient:
 
         """act:31 AP 管理/状态页：型号、版本、端口速率、运行时长、2.4G/5G 终端拆分。"""
 
-        data = await self._post_csdp(CSDP_API_PATH, {"act": 31})
+        data = await self._post_csdp(CSDP_API_PATH, {"act": ACT_AP_DETAILS, "c1150": 0})
 
         _LOGGER.debug("act:31 原始响应: %s", data)
 
