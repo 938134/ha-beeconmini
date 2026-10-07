@@ -61,7 +61,7 @@ class APEntityBase(CoordinatorEntity[BeeconMiniCoordinator]):
             hw_version=hw_version,
             serial_number=ap.ap_sn or None,
             connections=_build_ap_connections(self._ap_mac, ap),
-            via_device=(DOMAIN, self.coordinator.config_entry.entry_id),
+            via_device_id=f"{DOMAIN}_{self.coordinator.config_entry.entry_id}",
         )
 
 class ClientEntityBase(CoordinatorEntity[BeeconMiniCoordinator]):
@@ -89,16 +89,16 @@ class ClientEntityBase(CoordinatorEntity[BeeconMiniCoordinator]):
     @property
     def device_info(self) -> DeviceInfo:
         sta = self._sta
-        ap_via = None
+        ap_via_id: str | None = None
         if sta and sta.ap_mac:
-            ap_via = (DOMAIN, sta.ap_mac)
+            ap_via_id = f"{DOMAIN}_{sta.ap_mac}"
         name = sta.display_name if sta else self._sta_mac
         return DeviceInfo(
             identifiers={(DOMAIN, self._sta_mac)},
             name=name,
             manufacturer="BeeconMini Client",
             connections={("mac", self._sta_mac)},
-            via_device=ap_via,
+            via_device_id=ap_via_id,
         )
 
 
