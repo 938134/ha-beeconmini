@@ -60,8 +60,7 @@ class APEntityBase(CoordinatorEntity[BeeconMiniCoordinator]):
             sw_version=sw_version,
             hw_version=hw_version,
             serial_number=ap.ap_sn or None,
-            connections={("mac", self._ap_mac), ("ip", ap.ap_ip or ap.ip or "") if ap else ("ip", "")},
-            via_device=(DOMAIN, self.coordinator.config_entry.entry_id),
+            connections=_build_ap_connections(self._ap_mac, ap),
         )
 
 
@@ -102,6 +101,15 @@ class ClientEntityBase(CoordinatorEntity[BeeconMiniCoordinator]):
             via_device=ap_via,
         )
 
+
+def _build_ap_connections(ap_mac: str, ap) -> set[tuple[str, str]]: 
+    """构建 AP 连接标识集合，IP 为空时不加入，避免设备合并。""" 
+    conns = {("mac", ap_mac)} 
+    if ap: 
+        ip = ap.ap_ip or ap.ip or "" 
+        if ip: 
+            conns.add(("ip", ip)) 
+    return conns 
 
 def format_power_level(code: int) -> str:
     """功率档码转文案。"""
