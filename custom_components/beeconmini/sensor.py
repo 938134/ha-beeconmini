@@ -22,15 +22,11 @@ from .base import ACEntityBase, APEntityBase, ClientEntityBase, format_port_spee
 from .coordinator import BeeconMiniCoordinator
 from .const import DOMAIN
 from .model import ACState
-
-
 @dataclass(frozen=True, kw_only=True)
 class ACSensorDescription(SensorEntityDescription):
     """AC 主机传感器描述。"""
 
     value_fn: Callable[[ACState], float | int | str | None]
-
-
 AC_SENSORS: tuple[ACSensorDescription, ...] = (
     ACSensorDescription(
         key="cpu_temp",
@@ -67,7 +63,7 @@ AC_SENSORS: tuple[ACSensorDescription, ...] = (
     ACSensorDescription(
         key="client_count",
         translation_key="client_count",
-        state_class=SensorStateClass.MEASUREMENT,
+
         icon="mdi:wifi",
         value_fn=lambda s: f"{s.wireless_client_count}/{s.wired_client_count}",
     ),
@@ -92,13 +88,11 @@ AC_SENSORS: tuple[ACSensorDescription, ...] = (
     ACSensorDescription(
         key="ap_status",
         translation_key="ap_status",
-        state_class=SensorStateClass.MEASUREMENT,
+
         icon="mdi:access-point",
         value_fn=lambda s: f"{sum(1 for a in s.aps if a.online)}/{len(s.aps)}" if s.aps else "0/0",
     ),
 )
-
-
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: ConfigEntry,
@@ -147,8 +141,6 @@ async def async_setup_entry(
 
     _add_new_clients()
     entry.async_on_unload(coordinator.async_add_listener(_add_new_clients))
-
-
 class BeeconACSensor(ACEntityBase, SensorEntity):
     """AC 主机传感器。"""
 
@@ -173,8 +165,6 @@ class BeeconACSensor(ACEntityBase, SensorEntity):
     @property
     def native_value(self) -> float | int | str | None:
         return self.entity_description.value_fn(self.coordinator.data)
-
-
 class BeeconAPClientSensor(APEntityBase, SensorEntity):
     """单台 AP 的接入终端数。"""
 
@@ -206,8 +196,6 @@ class BeeconAPClientSensor(APEntityBase, SensorEntity):
             "射频数": ap.radios,
             "负载指标": ap.load,
         }
-
-
 class BeeconAPChannel24Sensor(APEntityBase, SensorEntity):
     """单台 AP 的 2.4G 终端数。"""
 
@@ -234,8 +222,6 @@ class BeeconAPChannel24Sensor(APEntityBase, SensorEntity):
             "信道": ap.channel_24,
             "功率档": ap.power_24_code,
         }
-
-
 class BeeconAPChannel5Sensor(APEntityBase, SensorEntity):
     """单台 AP 的 5G 终端数。"""
 
@@ -262,8 +248,6 @@ class BeeconAPChannel5Sensor(APEntityBase, SensorEntity):
             "信道": ap.channel_5,
             "功率档": ap.power_5_code,
         }
-
-
 class BeeconAPPortSpeedSensor(APEntityBase, SensorEntity):
     """单台 AP 的端口协商速率。"""
 
@@ -292,8 +276,6 @@ class BeeconAPPortSpeedSensor(APEntityBase, SensorEntity):
             "端口能力": format_port_speed(ap.port_cap_code),
             "端口插线": "未知" if ap.port_plug is None else ("已连接" if ap.port_plug else "已拔出"),
         }
-
-
 class BeeconAPUptimeSensor(APEntityBase, SensorEntity):
     """单台 AP 的运行时长（秒）。"""
 
@@ -326,8 +308,6 @@ class BeeconAPUptimeSensor(APEntityBase, SensorEntity):
             "运行小时": hours,
             "运行分钟": minutes,
         }
-
-
 class BeeconClientRSSISensor(ClientEntityBase, SensorEntity):
     """无线终端的 RSSI 信号强度传感器。"""
 
