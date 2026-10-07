@@ -442,6 +442,15 @@ class BeeconMiniClient:
         expected = f"[rben={'1' if enabled else '0'} day={day} hour={hour} min={minute}]"
         return expected in out
 
+    async def async_get_ap_details(self) -> list[dict[str, Any]]:
+        """act:31 AP 管理/状态页：型号、版本、端口速率、运行时长、2.4G/5G 终端拆分。"""
+        data = await self._post_csdp(self.CSDP_API_PATH, {"act": 31})
+        return data.get("aps", []) or []
+
+    async def async_get_rpolicys(self) -> dict[str, Any] | None:
+        """漫游策略快照（/tmp/json/rpolicys）。"""
+        return await self.async_get_json_snapshot("/tmp/json/rpolicys")
+
     async def async_reboot_all_aps(self) -> bool:
         """立即重启全部纳管 AP。
 

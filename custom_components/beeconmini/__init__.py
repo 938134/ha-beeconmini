@@ -28,6 +28,8 @@ from .const import (
     DEFAULT_USERNAME,
     DEFAULT_VERIFY_SSL,
     DOMAIN,
+    NAME,
+    VERSION,
 )
 from .coordinator import BeeconMiniCoordinator
 from .services import async_register_services
@@ -37,6 +39,7 @@ _LOGGER = logging.getLogger(__name__)
 PLATFORMS: list[Platform] = [
     Platform.SENSOR,
     Platform.BINARY_SENSOR,
+    Platform.BUTTON,
 ]
 
 

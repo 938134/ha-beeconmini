@@ -34,17 +34,35 @@
   },
   "entity": {
     "sensor": {
-      "cpu_temp": {"name": "CPU temperature"},
-      "cpu_usage": {"name": "CPU usage"},
-      "mem_usage": {"name": "Memory usage"},
-      "conn_num": {"name": "Connections"},
-      "wifi_clients": {"name": "Wireless clients"},
-      "wired_clients": {"name": "Wired clients"},
-      "wan_rx": {"name": "WAN received"},
-      "wan_tx": {"name": "WAN sent"}
+      "cpu_temp": {
+        "name": "CPU temperature"
+      },
+      "cpu_usage": {
+        "name": "CPU usage"
+      },
+      "mem_usage": {
+        "name": "Memory usage"
+      },
+      "conn_num": {
+        "name": "Connections"
+      },
+      "wifi_clients": {
+        "name": "Wireless clients"
+      },
+      "wired_clients": {
+        "name": "Wired clients"
+      },
+      "wan_rx": {
+        "name": "WAN received"
+      },
+      "wan_tx": {
+        "name": "WAN sent"
+      }
     },
     "binary_sensor": {
-      "ap_online": {"name": "Online"}
+      "ap_online": {
+        "name": "Online"
+      }
     }
   },
   "services": {
@@ -79,6 +97,41 @@
           "description": "Only for scheduled reboot"
         }
       }
+    }
+  },
+  "sensor": {
+    "ap_total": {
+      "name": "Total APs"
+    },
+    "ap_online": {
+      "name": "Online APs"
+    },
+    "roaming_policy": {
+      "name": "Roaming Policy"
+    },
+    "ap_clients": {
+      "name": "Connected Clients"
+    },
+    "ap_clients_24": {
+      "name": "2.4G Clients"
+    },
+    "ap_clients_5": {
+      "name": "5G Clients"
+    },
+    "ap_port_speed": {
+      "name": "Port Speed"
+    },
+    "ap_uptime": {
+      "name": "Uptime"
+    },
+    "ap_port_plug": {
+      "name": "Port Plug"
+    },
+    "reboot_ap": {
+      "name": "Reboot AP"
+    },
+    "kick_client": {
+      "name": "Kick Client"
     }
   }
 }

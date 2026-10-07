@@ -32,6 +32,7 @@ async def async_setup_entry(
                 continue
             known_aps.add(ap.mac)
             new_entities.append(BeeconAPOnlineSensor(coordinator, ap.mac))
+            new_entities.append(BeeconAPPortPlugSensor(coordinator, ap.mac))
         if new_entities:
             async_add_entities(new_entities)
 
@@ -64,3 +65,21 @@ class BeeconAPOnlineSensor(APEntityBase, BinarySensorEntity):
             "mac": ap.mac,
             "ip": ap.ip,
         }
+
+
+class BeeconAPPortPlugSensor(APEntityBase, BinarySensorEntity):
+    """单台 AP 的端口插线状态。"""
+
+    _attr_name = "端口插线"
+    _attr_device_class = BinarySensorDeviceClass.PLUG
+    _attr_icon = "mdi:ethernet-cable"
+    _attr_translation_key = "ap_port_plug"
+
+    def __init__(self, coordinator: BeeconMiniCoordinator, ap_mac: str) -> None:
+        super().__init__(coordinator, ap_mac)
+        self._attr_unique_id = f"{ap_mac}_port_plug"
+
+    @property
+    def is_on(self) -> bool:
+        ap = self._ap
+        return bool(ap and ap.port_plug)

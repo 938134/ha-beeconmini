@@ -1,6 +1,8 @@
 """BeeconMini 无线 AC 集成 —— 常量定义。"""
 
 DOMAIN = "beeconmini"
+NAME = "BeeconMini 无线 AC"
+VERSION = "1.1.0"
 
 # ---- LuCI 认证与 RPC 端点 ----
 LUCI_LOGIN_PATH = "/cgi-bin/luci/"
@@ -27,6 +29,8 @@ RB_DEFAULT_MINUTE = 0
 # ---- CSDP act 码（实测确认，均为紧凑 JSON POST） ----
 ACT_KICK = 249        # bxplug：剔除终端（厂商原生）
 ACT_STA_GET = 34      # bxplug：无线终端明细（含所属 AP / RSSI / 信道）
+ACT_AP_DETAILS = 31    # bxplug：AP 管理/状态页（型号/版本/端口速率）
+ACT_ROAMING_READ = 248   # bxplug：漫游策略读（只读，不写回）
 
 # ---- 本地 lua 命令 action ----
 ACTION_STATUS = "status"
@@ -41,6 +45,23 @@ SERVICE_REBOOT_APS = "reboot_aps"      # 立即 / 定时重启全部纳管 AP
 # ---- AC 运行时数据快照文件 ----
 JSON_SNAPSHOT_FILES = {
     "aps": "/tmp/json/apinfos",
+    "rpolicys": "/tmp/json/rpolicys",
+}
+
+# ---- 功率档映射（act:31 r03/r13） ----
+POWER_LEVELS = {
+    0: "极低",
+    1: "低",
+    2: "中",
+    3: "高",
+}
+
+# ---- 端口速率映射（act:31 s07/a041） ----
+PORT_SPEED_MAP = {
+    0: "10M",
+    1: "100M",
+    2: "1000M",
+    3: "2500M",
 }
 
 # ---- 配置项 ----

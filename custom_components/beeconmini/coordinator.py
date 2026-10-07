@@ -73,10 +73,12 @@ class BeeconMiniCoordinator(DataUpdateCoordinator[ACState]):
         users = users or []
         wan_stats = wan_stats or {}
 
-        # 边缘数据：stas（无线终端明细）+ AP 快照
-        stas, aps_snapshot = await asyncio.gather(
+        # 边缘数据：stas + AP 快照 + act:31 详情 + 漫游策略
+        stas, aps_snapshot, ap_details, rpolicys = await asyncio.gather(
             self.client.async_get_stas(),
             self.client.async_get_json_snapshot(JSON_SNAPSHOT_FILES["aps"]),
+            self.client.async_get_ap_details(),
+            self.client.async_get_rpolicys(),
             return_exceptions=True,
         )
         if isinstance(stas, BaseException):
@@ -85,6 +87,12 @@ class BeeconMiniCoordinator(DataUpdateCoordinator[ACState]):
         if isinstance(aps_snapshot, BaseException):
             _LOGGER.debug("读取 AP 快照失败: %s", aps_snapshot)
             aps_snapshot = None
+        if isinstance(ap_details, BaseException):
+            _LOGGER.debug("读取 AP 详情失败: %s", ap_details)
+            ap_details = []
+        if isinstance(rpolicys, BaseException):
+            _LOGGER.debug("读取漫游策略失败: %s", rpolicys)
+            rpolicys = None
 
         state = build_state(
             product=product,
@@ -93,6 +101,8 @@ class BeeconMiniCoordinator(DataUpdateCoordinator[ACState]):
             apinfos_raw=aps_snapshot,
             wan_stats=wan_stats,
             stas_raw=stas,
+            ap_details_raw=ap_details,
+            rpolicys_raw=rpolicys,
         )
         _LOGGER.debug(
             "AC 状态刷新：%d 台 AP / %d 台终端",

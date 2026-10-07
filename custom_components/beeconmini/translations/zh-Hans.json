@@ -34,17 +34,35 @@
   },
   "entity": {
     "sensor": {
-      "cpu_temp": {"name": "CPU 温度"},
-      "cpu_usage": {"name": "CPU 占用"},
-      "mem_usage": {"name": "内存占用"},
-      "conn_num": {"name": "连接数"},
-      "wifi_clients": {"name": "无线终端数"},
-      "wired_clients": {"name": "有线终端数"},
-      "wan_rx": {"name": "WAN 接收流量"},
-      "wan_tx": {"name": "WAN 发送流量"}
+      "cpu_temp": {
+        "name": "CPU 温度"
+      },
+      "cpu_usage": {
+        "name": "CPU 占用"
+      },
+      "mem_usage": {
+        "name": "内存占用"
+      },
+      "conn_num": {
+        "name": "连接数"
+      },
+      "wifi_clients": {
+        "name": "无线终端数"
+      },
+      "wired_clients": {
+        "name": "有线终端数"
+      },
+      "wan_rx": {
+        "name": "WAN 接收流量"
+      },
+      "wan_tx": {
+        "name": "WAN 发送流量"
+      }
     },
     "binary_sensor": {
-      "ap_online": {"name": "在线状态"}
+      "ap_online": {
+        "name": "在线状态"
+      }
     }
   },
   "services": {
@@ -79,6 +97,41 @@
           "description": "仅定时重启时生效"
         }
       }
+    }
+  },
+  "sensor": {
+    "ap_total": {
+      "name": "AP 总数"
+    },
+    "ap_online": {
+      "name": "AP 在线数"
+    },
+    "roaming_policy": {
+      "name": "漫游策略"
+    },
+    "ap_clients": {
+      "name": "接入终端数"
+    },
+    "ap_clients_24": {
+      "name": "2.4G 终端数"
+    },
+    "ap_clients_5": {
+      "name": "5G 终端数"
+    },
+    "ap_port_speed": {
+      "name": "端口速率"
+    },
+    "ap_uptime": {
+      "name": "运行时长"
+    },
+    "ap_port_plug": {
+      "name": "端口插线"
+    },
+    "reboot_ap": {
+      "name": "重启 AP"
+    },
+    "kick_client": {
+      "name": "剔除终端"
     }
   }
 }
