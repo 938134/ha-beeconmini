@@ -267,8 +267,11 @@ class ACState:
         return None
 
     def stas_of_ap(self, ap_mac: str) -> list[BeeconSta]:
-        target = ap_mac.upper()
-        return [s for s in self.stas if (s.ap_mac or "").upper() == target]
+        # s111 是射频 MAC（与 AP 的 a00 MAC 不同），必须用 s112 AP 名称匹配
+        ap = self.ap_by_mac(ap_mac)
+        if ap is None or not ap.name:
+            return []
+        return [s for s in self.stas if s.ap_name and s.ap_name == ap.name]
 
     @property
     def wireless_client_count(self) -> int:

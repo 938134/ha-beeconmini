@@ -913,8 +913,7 @@ class BeeconMiniClient:
             _LOGGER.warning("act:31 响应无 aps 字段或不是列表: keys=%s, 完整响应: %s", list(data.keys()), data)
             return []
 
-        _LOGGER.debug("act:31 AP 数量: %d", len(aps))
-
+        _LOGGER.warning("act:31 AP 数量=%d, 首条字段=%s", len(aps), list(aps[0].keys()) if aps else "空列表")
         return aps
 
 
