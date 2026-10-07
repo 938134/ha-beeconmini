@@ -11,7 +11,6 @@ from .coordinator import BeeconMiniCoordinator
 class ACEntityBase(CoordinatorEntity[BeeconMiniCoordinator]):
     """挂在 AC 主设备下的实体基类。"""
 
-    entity_description
     _attr_has_entity_name = True
 
     def __init__(self, coordinator: BeeconMiniCoordinator) -> None:
