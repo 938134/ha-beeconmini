@@ -125,17 +125,30 @@ class BeeconClientKickButton(ClientEntityBase, ButtonEntity):
         sta = self._sta
         if sta is None:
             return {}
-        return {
+        attrs: dict[str, object] = {
             "名称": sta.display_name,
             "ip": sta.ip,
             "mac": sta.mac,
             "所属AP": sta.ap_name or sta.ap_mac,
             "AP型号": sta.ap_model,
             "频段": sta.band,
-            "信道": sta.channel,
-            "RSSI_dBm": sta.rssi,
-            "协议": sta.phy_mode,
-            "Tx_Mbps": sta.tx_rate,
-            "Rx_Mbps": sta.rx_rate,
             "MLO": sta.mlo,
         }
+        if sta.mlo:
+            attrs["主链路信道"] = sta.channel
+            attrs["主链路RSSI"] = sta.rssi
+            attrs["主链路协议"] = sta.phy_mode
+            attrs["主链路Tx_Mbps"] = sta.tx_rate
+            attrs["主链路Rx_Mbps"] = sta.rx_rate
+            attrs["次链路信道"] = sta.channel_2
+            attrs["次链路RSSI"] = sta.rssi_2
+            attrs["次链路协议"] = sta.phy_mode_2
+            attrs["次链路Tx_Mbps"] = sta.tx_rate_2
+            attrs["次链路Rx_Mbps"] = sta.rx_rate_2
+        else:
+            attrs["信道"] = sta.channel
+            attrs["RSSI_dBm"] = sta.rssi
+            attrs["协议"] = sta.phy_mode
+            attrs["Tx_Mbps"] = sta.tx_rate
+            attrs["Rx_Mbps"] = sta.rx_rate
+        return attrs

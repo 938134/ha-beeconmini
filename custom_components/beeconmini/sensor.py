@@ -406,7 +406,14 @@ class BeeconAPConnectedClientsSensor(APEntityBase, SensorEntity):
         stas = self.coordinator.data.stas_of_ap(ap.mac)
         return {
             "终端列表": [
-                {"名称": s.display_name, "MAC": s.mac, "IP": s.ip, "信号": f"{s.rssi} dBm" if s.rssi else "未知"}
+                {
+                    "名称": s.display_name,
+                    "MAC": s.mac,
+                    "IP": s.ip,
+                    "信号": f"{s.rssi} dBm" if s.rssi else "未知",
+                    "频段": s.band,
+                    "MLO": s.mlo,
+                }
                 for s in stas
             ],
         }
@@ -434,15 +441,28 @@ class BeeconClientRSSISensor(ClientEntityBase, SensorEntity):
         sta = self._sta
         if sta is None:
             return {}
-        return {
+        attrs: dict[str, object] = {
             "名称": sta.display_name,
             "ip": sta.ip,
             "mac": sta.mac,
             "所属AP": sta.ap_name or sta.ap_mac,
             "频段": sta.band,
-            "信道": sta.channel,
-            "协议": sta.phy_mode,
-            "Tx_Mbps": sta.tx_rate,
-            "Rx_Mbps": sta.rx_rate,
             "MLO": sta.mlo,
         }
+        if sta.mlo:
+            attrs["主链路信道"] = sta.channel
+            attrs["主链路协议"] = sta.phy_mode
+            attrs["主链路Tx_Mbps"] = sta.tx_rate
+            attrs["主链路Rx_Mbps"] = sta.rx_rate
+            attrs["主链路RSSI"] = sta.rssi
+            attrs["次链路信道"] = sta.channel_2
+            attrs["次链路协议"] = sta.phy_mode_2
+            attrs["次链路Tx_Mbps"] = sta.tx_rate_2
+            attrs["次链路Rx_Mbps"] = sta.rx_rate_2
+            attrs["次链路RSSI"] = sta.rssi_2
+        else:
+            attrs["信道"] = sta.channel
+            attrs["协议"] = sta.phy_mode
+            attrs["Tx_Mbps"] = sta.tx_rate
+            attrs["Rx_Mbps"] = sta.rx_rate
+        return attrs

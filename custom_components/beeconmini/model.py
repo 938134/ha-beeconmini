@@ -108,6 +108,13 @@ class BeeconSta:
     rx_rate: int | None = None
     mlo: bool = False
 
+    # ---- MLO 次链路（exsta_list）----
+    channel_2: int | None = None
+    rssi_2: int | None = None
+    phy_mode_2: str | None = None
+    tx_rate_2: int | None = None
+    rx_rate_2: int | None = None
+
     @property
     def display_name(self) -> str:
         return self.hostname if self.hostname not in ("", "--") else self.mac
@@ -115,6 +122,7 @@ class BeeconSta:
     @classmethod
     def from_raw(cls, raw: dict[str, Any]) -> BeeconSta:
         band_code = _int(raw.get("a078"))
+        exsta = _extract_exsta(raw.get("exsta_list"))
         return cls(
             mac=str(raw.get("s10", "")).upper(),
             ip=str(raw.get("s11", "")),
@@ -129,7 +137,12 @@ class BeeconSta:
             phy_mode=str(raw.get("a073") or "").strip() or None,
             tx_rate=_int_or_none(raw.get("a074")),
             rx_rate=_int_or_none(raw.get("a075")),
-            mlo=bool(raw.get("exsta_list")),
+            mlo=exsta is not None,
+            channel_2=_int_or_none(exsta.get("a079")) if exsta else None,
+            rssi_2=_int_or_none(exsta.get("a072")) if exsta else None,
+            phy_mode_2=str(exsta.get("a073") or "").strip() or None if exsta else None,
+            tx_rate_2=_int_or_none(exsta.get("a074")) if exsta else None,
+            rx_rate_2=_int_or_none(exsta.get("a075")) if exsta else None,
         )
 
 
@@ -338,3 +351,19 @@ def _int_or_none(value: Any) -> int | None:
         return int(value)
     except (TypeError, ValueError):
         return None
+
+
+def _extract_exsta(exsta_list: Any) -> dict[str, Any] | None:
+    """提取 MLO 次链路信息。
+
+    exsta_list 可能是列表（取首个元素）或字典，
+    返回包含 a072/a073/a074/a075/a079 等字段的字典，或 None。
+    """
+    if not exsta_list:
+        return None
+    if isinstance(exsta_list, dict):
+        return exsta_list
+    if isinstance(exsta_list, list) and exsta_list:
+        first = exsta_list[0]
+        return first if isinstance(first, dict) else None
+    return None
