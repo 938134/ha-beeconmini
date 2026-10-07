@@ -36,7 +36,7 @@ class BeeconMiniCoordinator(DataUpdateCoordinator[ACState]):
         client: BeeconMiniClient,
         scan_interval: int = DEFAULT_SCAN_INTERVAL,
     ) -> None:
-        super().__init(
+        super().__init__(
             hass,
             _LOGGER,
             name=DOMAIN,

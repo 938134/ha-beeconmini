@@ -1,5 +1,8 @@
 # BeeconMini AC for Home Assistant
 
+![BeeconMini AC](brand/logo.png)
+
+
 Home Assistant 集成：读取 BeeconMini 无线 AC（SEED AC1/AC2/AC3/AC5）的 AC 主机与纳管 AP 运行状态，并提供终端剔除、AP 重启两个域级服务。
 
 ## 支持的设备
