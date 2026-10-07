@@ -22,7 +22,7 @@ class ACEntityBase(CoordinatorEntity[BeeconMiniCoordinator]):
             manufacturer=MANUFACTURER,
             model=dev.model or "SEED AC",
             sw_version=dev.version or None,
-            serial_number=dev.sn or None,
+            serial_number=dev.mac or None,
             configuration_url=coordinator.client.base_url,
         )
 
@@ -58,6 +58,7 @@ class APEntityBase(CoordinatorEntity[BeeconMiniCoordinator]):
             model=model,
             sw_version=sw_version,
             hw_version=hw_version,
+            serial_number=ap.mac or None,
             connections={("mac", self._ap_mac)},
             via_device=(DOMAIN, self.coordinator.config_entry.entry_id),
         )

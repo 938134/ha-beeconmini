@@ -34,35 +34,17 @@
   },
   "entity": {
     "sensor": {
-      "cpu_temp": {
-        "name": "CPU temperature"
-      },
-      "cpu_usage": {
-        "name": "CPU usage"
-      },
-      "mem_usage": {
-        "name": "Memory usage"
-      },
-      "conn_num": {
-        "name": "Connections"
-      },
-      "wifi_clients": {
-        "name": "Wireless clients"
-      },
-      "wired_clients": {
-        "name": "Wired clients"
-      },
-      "wan_rx": {
-        "name": "WAN received"
-      },
-      "wan_tx": {
-        "name": "WAN sent"
-      }
+      "cpu_temp": { "name": "CPU temperature" },
+      "cpu_usage": { "name": "CPU usage" },
+      "mem_usage": { "name": "Memory usage" },
+      "conn_num": { "name": "Connections" },
+      "client_count": { "name": "Clients (wired/wired)" },
+      "wan_rx": { "name": "WAN received" },
+      "wan_tx": { "name": "WAN sent" },
+      "ap_status": { "name": "AP status" }
     },
     "binary_sensor": {
-      "ap_online": {
-        "name": "Online"
-      }
+      "ap_online": { "name": "Online" }
     }
   },
   "services": {
@@ -70,100 +52,33 @@
       "name": "Kick client",
       "description": "Kick a wireless client by MAC address (vendor-native, one-shot deauth).",
       "fields": {
-        "mac": {
-          "name": "MAC address",
-          "description": "Target client MAC, e.g. aa:bb:cc:dd:ee:ff"
-        }
+        "mac": { "name": "MAC address", "description": "Target client MAC, e.g. aa:bb:cc:dd:ee:ff" }
       }
     },
     "reboot_aps": {
       "name": "Reboot managed APs",
       "description": "Omit hour/minute for immediate reboot; otherwise write a scheduled reboot plan.",
       "fields": {
-        "hour": {
-          "name": "Hour",
-          "description": "Omit for immediate reboot; 0-23"
-        },
-        "minute": {
-          "name": "Minute",
-          "description": "Omit for immediate reboot; 0-59"
-        },
-        "day": {
-          "name": "Day",
-          "description": "1-7 = Mon-Sun, 8 = daily"
-        },
-        "enabled": {
-          "name": "Enable schedule",
-          "description": "Only for scheduled reboot"
-        }
+        "hour": { "name": "Hour", "description": "Omit for immediate reboot; 0-23" },
+        "minute": { "name": "Minute", "description": "Omit for immediate reboot; 0-59" },
+        "day": { "name": "Day", "description": "1-7 = Mon-Sun, 8 = daily" },
+        "enabled": { "name": "Enable schedule", "description": "Only for scheduled reboot" }
       }
     }
   },
   "sensor": {
-    "ap_total": {
-      "name": "Total APs"
-    },
-    "ap_online": {
-      "name": "Online APs"
-    },
-    "roaming_policy": {
-      "name": "Roaming Policy"
-    },
-    "ap_clients": {
-      "name": "Connected Clients"
-    },
-    "ap_clients_24": {
-      "name": "2.4G Clients"
-    },
-    "ap_clients_5": {
-      "name": "5G Clients"
-    },
-    "ap_port_speed": {
-      "name": "Port Speed"
-    },
-    "ap_uptime": {
-      "name": "Uptime"
-    },
-    "ap_port_plug": {
-      "name": "Port Plug"
-    },
-    "reboot_ap": {
-      "name": "Reboot AP"
-    },
-    "kick_client": {
-      "name": "Kick Client"
-    },
-    "rssi": {
-      "name": "Signal Strength"
-    },
-    "roaming_r24_trigger": {
-      "name": "2.4G Roaming Trigger"
-    },
-    "roaming_r5_trigger": {
-      "name": "5G Roaming Trigger"
-    },
-    "roaming_r24_eviction": {
-      "name": "2.4G Eviction Threshold"
-    },
-    "roaming_r5_eviction": {
-      "name": "5G Eviction Threshold"
-    },
-    "roaming_load_balance": {
-      "name": "Load Balance RSSI"
-    },
-    "roaming_r24_max": {
-      "name": "2.4G Max Clients"
-    },
-    "roaming_r5_max": {
-      "name": "5G Max Clients"
-    }
+    "ap_clients": { "name": "Connected Clients" },
+    "ap_clients_24": { "name": "2.4G Clients" },
+    "ap_clients_5": { "name": "5G Clients" },
+    "ap_port_speed": { "name": "Port Speed" },
+    "ap_uptime": { "name": "Uptime" },
+    "ap_port_plug": { "name": "Port Plug" },
+    "reboot_ap": { "name": "Reboot AP" },
+    "kick_client": { "name": "Kick Client" },
+    "rssi": { "name": "Signal Strength" }
   },
   "binary_sensor": {
-    "roaming_r24_eviction_enabled": {
-      "name": "2.4G Eviction Enabled"
-    },
-    "roaming_r5_eviction_enabled": {
-      "name": "5G Eviction Enabled"
-    }
+    "roaming_r24_eviction": { "name": "2.4G Client Eviction" },
+    "roaming_r5_eviction": { "name": "5G Client Eviction" }
   }
 }

@@ -34,35 +34,17 @@
   },
   "entity": {
     "sensor": {
-      "cpu_temp": {
-        "name": "CPU 温度"
-      },
-      "cpu_usage": {
-        "name": "CPU 占用"
-      },
-      "mem_usage": {
-        "name": "内存占用"
-      },
-      "conn_num": {
-        "name": "连接数"
-      },
-      "wifi_clients": {
-        "name": "无线终端数"
-      },
-      "wired_clients": {
-        "name": "有线终端数"
-      },
-      "wan_rx": {
-        "name": "WAN 接收流量"
-      },
-      "wan_tx": {
-        "name": "WAN 发送流量"
-      }
+      "cpu_temp": { "name": "CPU 温度" },
+      "cpu_usage": { "name": "CPU 占用" },
+      "mem_usage": { "name": "内存占用" },
+      "conn_num": { "name": "连接数" },
+      "client_count": { "name": "终端数" },
+      "wan_rx": { "name": "WAN 接收流量" },
+      "wan_tx": { "name": "WAN 发送流量" },
+      "ap_status": { "name": "AP 状态" }
     },
     "binary_sensor": {
-      "ap_online": {
-        "name": "在线状态"
-      }
+      "ap_online": { "name": "在线状态" }
     }
   },
   "services": {
@@ -70,100 +52,33 @@
       "name": "剔除终端",
       "description": "按 MAC 地址剔除无线终端（厂商原生，一次性断连）。",
       "fields": {
-        "mac": {
-          "name": "MAC 地址",
-          "description": "目标终端 MAC，示例 aa:bb:cc:dd:ee:ff"
-        }
+        "mac": { "name": "MAC 地址", "description": "目标终端 MAC，示例 aa:bb:cc:dd:ee:ff" }
       }
     },
     "reboot_aps": {
       "name": "重启纳管 AP",
       "description": "不填 hour/minute 为立即重启；填了则写入定时重启计划。",
       "fields": {
-        "hour": {
-          "name": "小时",
-          "description": "留空=立即重启；0-23"
-        },
-        "minute": {
-          "name": "分钟",
-          "description": "留空=立即重启；0-59"
-        },
-        "day": {
-          "name": "重启日",
-          "description": "1-7=周一至周日，8=每天"
-        },
-        "enabled": {
-          "name": "启用定时",
-          "description": "仅定时重启时生效"
-        }
+        "hour": { "name": "小时", "description": "留空=立即重启；0-23" },
+        "minute": { "name": "分钟", "description": "留空=立即重启；0-59" },
+        "day": { "name": "重启日", "description": "1-7=周一至周日，8=每天" },
+        "enabled": { "name": "启用定时", "description": "仅定时重启时生效" }
       }
     }
   },
   "sensor": {
-    "ap_total": {
-      "name": "AP 总数"
-    },
-    "ap_online": {
-      "name": "AP 在线数"
-    },
-    "roaming_policy": {
-      "name": "漫游策略"
-    },
-    "ap_clients": {
-      "name": "接入终端数"
-    },
-    "ap_clients_24": {
-      "name": "2.4G 终端数"
-    },
-    "ap_clients_5": {
-      "name": "5G 终端数"
-    },
-    "ap_port_speed": {
-      "name": "端口速率"
-    },
-    "ap_uptime": {
-      "name": "运行时长"
-    },
-    "ap_port_plug": {
-      "name": "端口插线"
-    },
-    "reboot_ap": {
-      "name": "重启 AP"
-    },
-    "kick_client": {
-      "name": "剔除终端"
-    },
-    "rssi": {
-      "name": "信号强度"
-    },
-    "roaming_r24_trigger": {
-      "name": "2.4G 漫游触发"
-    },
-    "roaming_r5_trigger": {
-      "name": "5G 漫游触发"
-    },
-    "roaming_r24_eviction": {
-      "name": "2.4G 剔除阈值"
-    },
-    "roaming_r5_eviction": {
-      "name": "5G 剔除阈值"
-    },
-    "roaming_load_balance": {
-      "name": "负载均衡 RSSI"
-    },
-    "roaming_r24_max": {
-      "name": "2.4G 终端上限"
-    },
-    "roaming_r5_max": {
-      "name": "5G 终端上限"
-    }
+    "ap_clients": { "name": "接入终端数" },
+    "ap_clients_24": { "name": "2.4G 终端数" },
+    "ap_clients_5": { "name": "5G 终端数" },
+    "ap_port_speed": { "name": "端口速率" },
+    "ap_uptime": { "name": "运行时长" },
+    "ap_port_plug": { "name": "端口插线" },
+    "reboot_ap": { "name": "重启 AP" },
+    "kick_client": { "name": "剔除终端" },
+    "rssi": { "name": "信号强度" }
   },
   "binary_sensor": {
-    "roaming_r24_eviction_enabled": {
-      "name": "2.4G 剔除开关"
-    },
-    "roaming_r5_eviction_enabled": {
-      "name": "5G 剔除开关"
-    }
+    "roaming_r24_eviction": { "name": "2.4G 终端剔除" },
+    "roaming_r5_eviction": { "name": "5G 终端剔除" }
   }
 }

@@ -1,4 +1,4 @@
-"""二元传感器：单台 AP 的在线状态。"""
+"""二元传感器：AP 在线/插线 + 漫游剔除策略。"""
 from __future__ import annotations
 
 from homeassistant.components.binary_sensor import (
@@ -19,9 +19,16 @@ async def async_setup_entry(
     entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """为每台 AP 建立在线状态传感器；新 AP 动态补建。"""
+    """建立 AC 级漫游传感器 + 动态 AP 传感器。"""
     coordinator: BeeconMiniCoordinator = hass.data[DOMAIN][entry.entry_id]
 
+    # AC 级：漫游剔除策略
+    async_add_entities([
+        BeeconRoamingR24BinarySensor(coordinator),
+        BeeconRoamingR5BinarySensor(coordinator),
+    ])
+
+    # 动态 AP 传感器
     known_aps: set[str] = set()
 
     @callback
@@ -85,37 +92,73 @@ class BeeconAPPortPlugSensor(APEntityBase, BinarySensorEntity):
         return bool(ap and ap.port_plug)
 
 
-class BeeconRoamingR24EvictionBinarySensor(ACEntityBase, BinarySensorEntity):
-    """2.4G 剔除低速终端开关。"""
+class BeeconRoamingR24BinarySensor(ACEntityBase, BinarySensorEntity):
+    """2.4G 终端剔除策略（含漫游触发 + 剔除阈值）。"""
 
-    _attr_name = "2.4G 剔除开关"
+    _attr_name = "2.4G 终端剔除"
     _attr_device_class = BinarySensorDeviceClass.RUNNING
     _attr_icon = "mdi:wifi-off"
-    _attr_translation_key = "roaming_r24_eviction_enabled"
+    _attr_translation_key = "roaming_r24_eviction"
 
     def __init__(self, coordinator: BeeconMiniCoordinator) -> None:
         super().__init__(coordinator)
-        self._attr_unique_id = f"{coordinator.config_entry.entry_id}_roaming_r24_eviction_enabled"
+        self._attr_unique_id = f"{coordinator.config_entry.entry_id}_roaming_r24_eviction"
 
     @property
     def is_on(self) -> bool:
         rp = self.coordinator.data.rpolicy
-        return bool(rp and rp.r24_eviction_enabled)
+        if not rp:
+            return False
+        trigger = rp.r24_roaming_trigger_dbm
+        eviction = rp.r24_eviction_threshold_dbm
+        return bool(
+            (trigger is not None and trigger != 0)
+            or (eviction is not None and eviction != 0)
+        )
+
+    @property
+    def extra_state_attributes(self) -> dict[str, object]:
+        rp = self.coordinator.data.rpolicy
+        if not rp:
+            return {}
+        return {
+            "漫游触发阈值": f"{rp.r24_roaming_trigger_dbm} dBm" if rp.r24_roaming_trigger_dbm else "未设置",
+            "剔除阈值": f"{rp.r24_eviction_threshold_dbm} dBm" if rp.r24_eviction_threshold_dbm else "未设置",
+            "启用状态": rp.r24_eviction_enabled,
+        }
 
 
-class BeeconRoamingR5EvictionBinarySensor(ACEntityBase, BinarySensorEntity):
-    """5G 剔除低速终端开关。"""
+class BeeconRoamingR5BinarySensor(ACEntityBase, BinarySensorEntity):
+    """5G 终端剔除策略（含漫游触发 + 剔除阈值）。"""
 
-    _attr_name = "5G 剔除开关"
+    _attr_name = "5G 终端剔除"
     _attr_device_class = BinarySensorDeviceClass.RUNNING
     _attr_icon = "mdi:wifi-off"
-    _attr_translation_key = "roaming_r5_eviction_enabled"
+    _attr_translation_key = "roaming_r5_eviction"
 
     def __init__(self, coordinator: BeeconMiniCoordinator) -> None:
         super().__init__(coordinator)
-        self._attr_unique_id = f"{coordinator.config_entry.entry_id}_roaming_r5_eviction_enabled"
+        self._attr_unique_id = f"{coordinator.config_entry.entry_id}_roaming_r5_eviction"
 
     @property
     def is_on(self) -> bool:
         rp = self.coordinator.data.rpolicy
-        return bool(rp and rp.r5_eviction_enabled)
+        if not rp:
+            return False
+        trigger = rp.r5_roaming_trigger_dbm
+        eviction = rp.r5_eviction_threshold_dbm
+        return bool(
+            (trigger is not None and trigger != 0)
+            or (eviction is not None and eviction != 0)
+        )
+
+    @property
+    def extra_state_attributes(self) -> dict[str, object]:
+        rp = self.coordinator.data.rpolicy
+        if not rp:
+            return {}
+        return {
+            "漫游触发阈值": f"{rp.r5_roaming_trigger_dbm} dBm" if rp.r5_roaming_trigger_dbm else "未设置",
+            "剔除阈值": f"{rp.r5_eviction_threshold_dbm} dBm" if rp.r5_eviction_threshold_dbm else "未设置",
+            "启用状态": rp.r5_eviction_enabled,
+        }
