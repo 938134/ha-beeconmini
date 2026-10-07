@@ -445,10 +445,12 @@ class BeeconMiniClient:
     async def async_get_ap_details(self) -> list[dict[str, Any]]:
         """act:31 AP 管理/状态页：型号、版本、端口速率、运行时长、2.4G/5G 终端拆分。"""
         data = await self._post_csdp(CSDP_API_PATH, {"act": 31})
+        _LOGGER.debug("act:31 原始响应: %s", data)
         if data.get("errno") not in (0, None):
             _LOGGER.warning("读取 AP 详情失败: %s", data)
             return []
         aps = data.get("aps")
+        _LOGGER.debug("act:31 AP 数量: %d", len(aps) if isinstance(aps, list) else 0)
         return aps if isinstance(aps, list) else []
 
     async def async_get_rpolicys(self) -> dict[str, Any] | None:

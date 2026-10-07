@@ -61,8 +61,8 @@ class APEntityBase(CoordinatorEntity[BeeconMiniCoordinator]):
             hw_version=hw_version,
             serial_number=ap.ap_sn or None,
             connections=_build_ap_connections(self._ap_mac, ap),
+            via_device=(DOMAIN, self.coordinator.config_entry.entry_id),
         )
-
 
 class ClientEntityBase(CoordinatorEntity[BeeconMiniCoordinator]):
     """挂在终端设备下的实体基类。
