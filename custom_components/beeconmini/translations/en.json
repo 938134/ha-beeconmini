@@ -60,8 +60,11 @@
       }
     },
     "binary_sensor": {
-      "ap_online": {
-        "name": "Online"
+      "roaming_r24_eviction": {
+        "name": "2.4G Client Eviction"
+      },
+      "roaming_r5_eviction": {
+        "name": "5G Client Eviction"
       }
     }
   },
@@ -188,6 +191,9 @@
     }
   },
   "binary_sensor": {
+    "ap_online": {
+      "name": "Online"
+    },
     "roaming_r24_eviction": {
       "name": "2.4G Client Eviction"
     },

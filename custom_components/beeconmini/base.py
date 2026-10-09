@@ -1,10 +1,11 @@
 """BeeconMini AC 实体基类：AC 主机 / AP / 终端三层设备。"""
 from __future__ import annotations
 
-from homeassistant.helpers.entity import DeviceInfo
+from collections.abc import Callable
+
+from homeassistant.helpers.entity import DeviceInfo, Entity
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .api import format_port_speed, format_power_level
 from .const import DOMAIN, MANUFACTURER
 from .coordinator import BeeconMiniCoordinator
 
@@ -19,7 +20,7 @@ class ACEntityBase(CoordinatorEntity[BeeconMiniCoordinator]):
         dev = coordinator.data.device
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, coordinator.config_entry.entry_id)},
-            name=f"BeeconMini AC · {dev.model or 'SEED'}",
+            name=f"AC · {dev.model or 'SEED'}",
             manufacturer=MANUFACTURER,
             model=dev.model or "SEED AC",
             sw_version=dev.version or None,
@@ -122,7 +123,7 @@ class ClientEntityBase(CoordinatorEntity[BeeconMiniCoordinator]):
         return DeviceInfo(
             identifiers={(DOMAIN, self._sta_mac)},
             # 与「AP · 悦房」同构的命名，便于在 AP 页的「已连接的设备」里辨认
-            name=f"终端 · {name}",
+            name=f"STA · {name}",
             manufacturer=MANUFACTURER,
             model="无线终端",
             # MAC 只放设备信息：不单独做传感器
@@ -132,11 +133,85 @@ class ClientEntityBase(CoordinatorEntity[BeeconMiniCoordinator]):
         )
 
 
-# 展示格式化由 api 层统一提供，这里再导出一次，保持历史 import 路径可用
+# ----------------------------------------------------------------------
+# 动态实体注册器（AP / 终端上线自动注册，离线自动移除）
+# ----------------------------------------------------------------------
+class DynamicEntityTracker:
+    """统一管理动态实体（AP / 终端）的注册与移除。
+
+    每个平台（sensor / binary_sensor / button）各自持有一个 Tracker 实例，
+    通过 factory 回调创建实体。协调器每次刷新后调用 ``on_update()`` 同步。
+
+    **终端迁移**：终端在 AP 间漫游时，实体（unique_id 不变）的
+    ``via_device`` 由 ``ClientEntityBase.device_info`` 动态更新，
+    Tracker 不需要介入——它只管实体的**增删**，不管 ``via_device`` 变化。
+    """
+
+    def __init__(
+        self,
+        *,
+        entity_type: str,
+        factory: Callable[[str], list[Entity]],
+        offline_grace: int = 3,
+    ) -> None:
+        """
+        :param entity_type: 'ap' 或 'sta'，决定从 coordinator.data 取哪个列表。
+        :param factory: 收到一个 mac，返回要注册的实体列表。
+        :param offline_grace: 实体离线多少轮后才移除（避免网络抖动误删）。
+        """
+        self._type = entity_type
+        self._factory = factory
+        self._offline_grace = offline_grace
+        self._known: dict[str, int] = {}  # mac → 连续离线次数
+        self._added: set[str] = set()     # 已注册的 mac
+
+    def on_update(
+        self,
+        coordinator: BeeconMiniCoordinator,
+        async_add_entities: Callable,
+    ) -> None:
+        """协调器刷新后调用，同步实体增删。"""
+        entities = coordinator.data.aps if self._type == "ap" else coordinator.data.stas
+        macs = {getattr(e, "mac", "") for e in entities if getattr(e, "mac", "")}
+        macs.discard("")
+
+        # 1. 新出现的 → 注册
+        new_macs = macs - self._added
+        if new_macs:
+            new_entities: list[Entity] = []
+            for mac in new_macs:
+                self._added.add(mac)
+                self._known.pop(mac, None)
+                new_entities.extend(self._factory(mac))
+            if new_entities:
+                async_add_entities(new_entities)
+
+        # 2. 消失的 → 记录离线次数
+        disappeared = self._added - macs
+        for mac in disappeared:
+            self._known[mac] = self._known.get(mac, 0) + 1
+
+        # 3. 连续离线超过宽限期 → 标记为可移除
+        #    （实际移除需要平台层配合 async_remove_entities 或 entity_registry）
+        #    这里只清理内部记录，HA 的 entity_registry 会保留离线实体。
+        for mac in list(self._known):
+            if self._known[mac] >= self._offline_grace:
+                self._added.discard(mac)
+                self._known.pop(mac, None)
+
+        # 4. 仍然在线的 → 清零离线计数
+        for mac in macs:
+            self._known.pop(mac, None)
+
+    @property
+    def known_macs(self) -> set[str]:
+        """当前已注册且在线的 MAC 集合。"""
+        return set(self._added)
+
+
 __all__ = [
     "ACEntityBase",
     "APEntityBase",
     "ClientEntityBase",
-    "format_power_level",
-    "format_port_speed",
+    "DynamicEntityTracker",
 ]

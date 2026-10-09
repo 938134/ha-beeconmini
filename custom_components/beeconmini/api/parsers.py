@@ -265,3 +265,49 @@ def to_dbm(raw: Any) -> int | None:
     if value is None or value == 0:
         return None
     return value - P.ROAM_RSSI_OFFSET
+
+
+# ----------------------------------------------------------------------
+# 终端展示
+# ----------------------------------------------------------------------
+def text_or_none(value: object) -> str | None:
+    """空串 / 占位符 → None（HA 显示「未知」而不是空行）。"""
+    if value is None:
+        return None
+    text = str(value).strip()
+    if text in ("", "-", "--", "无", "unknown", "Unknown", "N/A", "n/a"):
+        return None
+    return text
+
+
+def sta_summary(sta: Any) -> dict[str, object]:
+    """一台无线终端的一行摘要（放进 AP「已连接设备」的属性里）。"""
+    item: dict[str, object] = {
+        "名称": sta.display_name,
+        "MAC": sta.mac,
+        "IP": sta.ip or "未知",
+        "信号": f"{sta.rssi} dBm" if sta.rssi is not None else "未知",
+        "频段": sta.band,
+        "信道": sta.channel,
+        "协议": sta.phy_mode,
+        "Tx_Mbps": sta.tx_rate,
+        "Rx_Mbps": sta.rx_rate,
+    }
+    if sta.mlo:
+        item["MLO"] = True
+        item["次链路信道"] = sta.channel_2
+        item["次链路RSSI"] = f"{sta.rssi_2} dBm" if sta.rssi_2 is not None else "未知"
+    return item
+
+
+def mlo_attrs(sta: Any) -> dict[str, object]:
+    """MLO 次链路明细（单链路终端返回空）。"""
+    if not sta.mlo:
+        return {}
+    return {
+        "次链路信道": sta.channel_2,
+        "次链路协议": text_or_none(sta.phy_mode_2),
+        "次链路发送速率_Mbps": sta.tx_rate_2,
+        "次链路接收速率_Mbps": sta.rx_rate_2,
+        "次链路RSSI_dBm": sta.rssi_2,
+    }
