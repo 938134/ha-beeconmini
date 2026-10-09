@@ -32,7 +32,6 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from .api import (
     ACState,
     BeeconAP,
-    BeeconMiniCoordinator,
     BeeconSta,
     format_port_speed,
     format_power_level,
@@ -40,6 +39,7 @@ from .api import (
     sta_summary,
     text_or_none,
 )
+from .coordinator import BeeconMiniCoordinator
 from .base import ACEntityBase, APEntityBase, ClientEntityBase
 from .const import DOMAIN
 
