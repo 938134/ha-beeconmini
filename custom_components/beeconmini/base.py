@@ -51,7 +51,7 @@ class APEntityBase(CoordinatorEntity[BeeconMiniCoordinator]):
     def device_info(self) -> DeviceInfo:
         ap = self._ap
         name = ap.display_name if ap else self._ap_mac
-        model = (ap.ap_model or "无线 AP") if ap else "无线 AP"
+        model = (ap.ap_model or "未知型号") if ap else "离线"
         sw_version = ap.ap_version or None if ap else None
         hw_version = ap.ap_sn or None if ap else None
         return DeviceInfo(
