@@ -4,7 +4,8 @@ from __future__ import annotations
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import DOMAIN, MANUFACTURER, POWER_LEVELS, PORT_SPEED_MAP
+from .api import format_port_speed, format_power_level
+from .const import DOMAIN, MANUFACTURER
 from .coordinator import BeeconMiniCoordinator
 
 
@@ -24,7 +25,7 @@ class ACEntityBase(CoordinatorEntity[BeeconMiniCoordinator]):
             sw_version=dev.version or None,
             serial_number=dev.sn or None,
             configuration_url=coordinator.client.base_url,
-            connections={("mac", dev.mac or "")},
+            connections={("mac", dev.mac)} if dev.mac else set(),
         )
 
 
@@ -60,16 +61,41 @@ class APEntityBase(CoordinatorEntity[BeeconMiniCoordinator]):
             sw_version=sw_version,
             hw_version=hw_version,
             serial_number=ap.ap_sn or None,
-            connections=_build_ap_connections(self._ap_mac, ap),
+            # ⚠️ 只用 MAC 作设备标识：IP 会变（DHCP），且与其他集成撞车时
+            #    HA 会把两个设备误判为同一个。
+            connections={("mac", self._ap_mac)},
             via_device=(DOMAIN, self.coordinator.config_entry.entry_id),
         )
 
 class ClientEntityBase(CoordinatorEntity[BeeconMiniCoordinator]):
-    """挂在终端设备下的实体基类。
+    """挂在单台无线终端设备下的实体基类。
 
-    每台无线终端（stas）独立成一个 device，
-    via_device 指向其当前连接的 AP。
-    终端离线后 device 自动清理。
+    一台无线终端 = 一个 device，**``via_device`` 指向它当前接入的 AP**。
+    这样 HA 会在 AP 设备页原生渲染出「已连接的设备」卡片列出这些终端，
+    点进去即是该终端的详情页。
+
+    终端设备页与 AP 设备页同构（都由 HA 原生渲染，不需要自研 UI）：
+
+    ==================  =========================================
+    AP 设备页            终端设备页
+    ==================  =========================================
+    设备信息：型号 / 固件   设备信息：型号「无线终端」/ 序列号
+    版本 / 序列号 / MAC    / **MAC**（connections）/ 已连接到 AP
+    控制：重启 AP         控制：剔除终端
+    传感器：信道 / 功率…   传感器：信号强度 / 频段 / 信道 / 协议 /
+                       发送速率 / 接收速率 / IP / MLO
+    ==================  =========================================
+
+    **MAC 不做传感器**：交给设备信息的 ``connections``（HA 会渲染成
+    「MAC: xx:xx:…」，装了 DHCP 集成时还可点击跳转），并同时写入
+    ``serial_number``（终端没有可读的硬件序列号，MAC 就是它的唯一标识）。
+
+    ⚠️ `sta.ap_mac` 取自 act:34 的 ``s111``，实测与 act:31 的 ``a00``
+    **完全相等**（2026-10-08 实机复核三台全中），所以父设备能正确解析。
+    就算 act:31 整条挂掉，``models._build_aps`` 也会用 act:34 的
+    ``s111`` / ``s112`` 兜底建出 AP 条目，链接不会断；只有 act:31 与 act:34
+    **双双**失败时，``via_device`` 才会退化为 None（终端仍会出现，
+    只是暂时不挂在 AP 之下）。
     """
 
     _attr_has_entity_name = True
@@ -95,33 +121,22 @@ class ClientEntityBase(CoordinatorEntity[BeeconMiniCoordinator]):
         name = sta.display_name if sta else self._sta_mac
         return DeviceInfo(
             identifiers={(DOMAIN, self._sta_mac)},
-            name=name,
-            manufacturer="BeeconMini Client",
+            # 与「AP · 悦房」同构的命名，便于在 AP 页的「已连接的设备」里辨认
+            name=f"终端 · {name}",
+            manufacturer=MANUFACTURER,
+            model="无线终端",
+            # MAC 只放设备信息：不单独做传感器
+            serial_number=self._sta_mac,
             connections={("mac", self._sta_mac)},
             via_device=ap_via,
         )
 
 
-def _build_ap_connections(ap_mac: str, ap) -> set[tuple[str, str]]: 
-    """构建 AP 连接标识集合，IP 为空时不加入，避免设备合并。""" 
-    conns = {("mac", ap_mac)} 
-    if ap: 
-        ip = ap.ap_ip or ap.ip or "" 
-        if ip: 
-            conns.add(("ip", ip)) 
-    return conns 
-
-def format_power_level(code: int | None) -> str:
-    """功率档码转文案。"""
-    if code is None or code < 0:
-        return "未知"
-    return POWER_LEVELS.get(code, f"档 {code}")
-
-
-def format_port_speed(code: int | None) -> str:
-    """端口速率码转文案。"""
-    if code is None or code < 0:
-        return "未知"
-    if code == 255:
-        return "Auto"
-    return PORT_SPEED_MAP.get(code, f"{code}")
+# 展示格式化由 api 层统一提供，这里再导出一次，保持历史 import 路径可用
+__all__ = [
+    "ACEntityBase",
+    "APEntityBase",
+    "ClientEntityBase",
+    "format_power_level",
+    "format_port_speed",
+]

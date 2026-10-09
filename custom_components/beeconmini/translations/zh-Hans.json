@@ -17,7 +17,9 @@
       "cannot_connect": "无法连接到路由器，请检查地址与网络",
       "unknown": "未知错误，请查看日志"
     },
-    "abort": { "already_configured": "该路由器已配置" }
+    "abort": {
+      "already_configured": "该路由器已配置"
+    }
   },
   "options": {
     "step": {
@@ -32,49 +34,165 @@
   },
   "entity": {
     "sensor": {
-      "cpu_temp": { "name": "CPU 温度" },
-      "cpu_usage": { "name": "CPU 占用" },
-      "mem_usage": { "name": "内存占用" },
-      "conn_num": { "name": "连接数" },
-      "client_count": { "name": "终端数" },
-      "wan_rx": { "name": "WAN 接收流量" },
-      "wan_tx": { "name": "WAN 发送流量" },
-      "ap_status": { "name": "AP 状态" }
+      "cpu_temp": {
+        "name": "CPU 温度"
+      },
+      "cpu_usage": {
+        "name": "CPU 占用"
+      },
+      "mem_usage": {
+        "name": "内存占用"
+      },
+      "conn_num": {
+        "name": "连接数"
+      },
+      "client_count": {
+        "name": "终端数"
+      },
+      "wan_rx": {
+        "name": "WAN 接收流量"
+      },
+      "wan_tx": {
+        "name": "WAN 发送流量"
+      },
+      "ap_status": {
+        "name": "AP 状态"
+      }
     },
-    "binary_sensor": { "ap_online": { "name": "在线状态" } }
+    "binary_sensor": {
+      "ap_online": {
+        "name": "在线状态"
+      }
+    }
   },
   "services": {
     "kick_client": {
       "name": "剔除终端",
-      "description": "按 MAC 地址剔除无线终端（厂商原生，一次性断连）。",
-      "fields": { "mac": { "name": "MAC 地址", "description": "目标终端 MAC，示例 aa:bb:cc:dd:ee:ff" } }
+      "description": "按 MAC 地址剔除无线终端（厂商原生，一次性断连）。也可直接在终端的设备页点「剔除终端」按钮。",
+      "fields": {
+        "mac": {
+          "name": "MAC 地址",
+          "description": "目标终端 MAC，示例 aa:bb:cc:dd:ee:ff"
+        }
+      }
     },
     "reboot_aps": {
       "name": "重启纳管 AP",
-      "description": "不填 hour/minute 为立即重启；填了则写入定时重启计划。",
+      "description": "不填 hour/minute = 立即重启全部纳管 AP（走固件真实的 bxplug 通道，AC 自身不重启，AP 约 40–110 秒后自动回上线）；填了则写入定时重启计划 —— ⚠️ 该计划固件不会执行，仅作记录。",
       "fields": {
-        "hour": { "name": "小时", "description": "留空=立即重启；0-23" },
-        "minute": { "name": "分钟", "description": "留空=立即重启；0-59" },
-        "day": { "name": "重启日", "description": "1-7=周一至周日，8=每天" },
-        "enabled": { "name": "启用定时", "description": "仅定时重启时生效" }
+        "hour": {
+          "name": "小时",
+          "description": "留空=立即重启；0-23"
+        },
+        "minute": {
+          "name": "分钟",
+          "description": "留空=立即重启；0-59"
+        },
+        "day": {
+          "name": "重启日",
+          "description": "1-7=周一至周日，8=每天"
+        },
+        "enabled": {
+          "name": "启用定时",
+          "description": "仅定时重启时生效"
+        }
+      }
+    },
+    "reboot_ap": {
+      "name": "重启单台 AP",
+      "description": "只重启指定的那一台 AP，其余 AP 不受影响（厂商 cocmd 通道，定向由 MAC 决定）。也可直接在该 AP 设备页点「重启此 AP」按钮。",
+      "fields": {
+        "mac": {
+          "name": "AP 的 MAC",
+          "description": "目标 AP 的 MAC，示例 aa:bb:cc:dd:ee:ff；与 name 二选一"
+        },
+        "name": {
+          "name": "AP 名称",
+          "description": "目标 AP 的名称（如「悦房」）；与 mac 二选一"
+        }
+      }
+    },
+    "run_ap_command": {
+      "name": "在单台 AP 上执行命令",
+      "description": "⚠️ 排障用：把 shell 下发到指定的一台 AP 上以 root 执行，回显写进日志并触发 beeconmini_ap_command_result 事件。",
+      "fields": {
+        "mac": {
+          "name": "AP 的 MAC",
+          "description": "目标 AP 的 MAC；与 name 二选一"
+        },
+        "name": {
+          "name": "AP 名称",
+          "description": "目标 AP 的名称；与 mac 二选一"
+        },
+        "command": {
+          "name": "命令",
+          "description": "在该 AP 上执行的单行 shell，示例 logread | tail -30"
+        }
       }
     }
   },
   "sensor": {
-    "ap_channel": { "name": "信道" },
-    "ap_power": { "name": "功率" },
-    "ap_clients": { "name": "用户数" },
-    "ap_port_speed": { "name": "端口速率" },
-    "ap_uptime": { "name": "运行时长" },
-    "ap_ip": { "name": "IP 地址" },
-    "ap_model": { "name": "型号" },
-    "ap_connected_clients": { "name": "已连接设备" },
-    "reboot_ap": { "name": "重启 AP" },
-    "kick_client": { "name": "剔除终端" },
-    "rssi": { "name": "信号强度" }
+    "ap_channel": {
+      "name": "信道"
+    },
+    "ap_power": {
+      "name": "功率"
+    },
+    "ap_clients": {
+      "name": "无线终端数"
+    },
+    "ap_port_speed": {
+      "name": "端口速率"
+    },
+    "ap_uptime": {
+      "name": "运行时长"
+    },
+    "ap_ip": {
+      "name": "IP 地址"
+    },
+    "ap_model": {
+      "name": "型号"
+    },
+    "reboot_ap": {
+      "name": "重启全部 AP"
+    },
+    "kick_client": {
+      "name": "剔除终端"
+    },
+    "rssi": {
+      "name": "信号强度"
+    },
+    "client_band": {
+      "name": "频段"
+    },
+    "client_channel": {
+      "name": "信道"
+    },
+    "client_phy": {
+      "name": "协议"
+    },
+    "client_tx": {
+      "name": "发送速率"
+    },
+    "client_rx": {
+      "name": "接收速率"
+    },
+    "client_ip": {
+      "name": "IP 地址"
+    },
+    "client_mlo": {
+      "name": "MLO 多链路"
+    },
+    "reboot_this_ap": {
+      "name": "重启此 AP"
+    }
   },
   "binary_sensor": {
-    "roaming_r24_eviction": { "name": "2.4G 终端剔除" },
-    "roaming_r5_eviction": { "name": "5G 终端剔除" }
+    "roaming_r24_eviction": {
+      "name": "2.4G 终端剔除"
+    },
+    "roaming_r5_eviction": {
+      "name": "5G 终端剔除"
+    }
   }
 }

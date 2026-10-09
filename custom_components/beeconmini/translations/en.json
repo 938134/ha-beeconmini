@@ -17,7 +17,9 @@
       "cannot_connect": "Cannot reach the router, check address and network",
       "unknown": "Unknown error, see logs"
     },
-    "abort": { "already_configured": "This router is already configured" }
+    "abort": {
+      "already_configured": "This router is already configured"
+    }
   },
   "options": {
     "step": {
@@ -32,49 +34,165 @@
   },
   "entity": {
     "sensor": {
-      "cpu_temp": { "name": "CPU temperature" },
-      "cpu_usage": { "name": "CPU usage" },
-      "mem_usage": { "name": "Memory usage" },
-      "conn_num": { "name": "Connections" },
-      "client_count": { "name": "Clients" },
-      "wan_rx": { "name": "WAN received" },
-      "wan_tx": { "name": "WAN sent" },
-      "ap_status": { "name": "AP status" }
+      "cpu_temp": {
+        "name": "CPU temperature"
+      },
+      "cpu_usage": {
+        "name": "CPU usage"
+      },
+      "mem_usage": {
+        "name": "Memory usage"
+      },
+      "conn_num": {
+        "name": "Connections"
+      },
+      "client_count": {
+        "name": "Clients"
+      },
+      "wan_rx": {
+        "name": "WAN received"
+      },
+      "wan_tx": {
+        "name": "WAN sent"
+      },
+      "ap_status": {
+        "name": "AP status"
+      }
     },
-    "binary_sensor": { "ap_online": { "name": "Online" } }
+    "binary_sensor": {
+      "ap_online": {
+        "name": "Online"
+      }
+    }
   },
   "services": {
     "kick_client": {
       "name": "Kick client",
       "description": "Kick a wireless client by MAC address.",
-      "fields": { "mac": { "name": "MAC address", "description": "Target client MAC, e.g. aa:bb:cc:dd:ee:ff" } }
+      "fields": {
+        "mac": {
+          "name": "MAC address",
+          "description": "Target client MAC, e.g. aa:bb:cc:dd:ee:ff"
+        }
+      }
     },
     "reboot_aps": {
       "name": "Reboot managed APs",
-      "description": "Omit hour/minute for immediate reboot.",
+      "description": "Omit hour/minute to reboot ALL managed APs now (real firmware channel; the AC itself does not reboot, APs rejoin after ~40-110s). Provide them to write a reboot schedule - note the firmware never executes it.",
       "fields": {
-        "hour": { "name": "Hour", "description": "Omit for immediate reboot; 0-23" },
-        "minute": { "name": "Minute", "description": "Omit for immediate reboot; 0-59" },
-        "day": { "name": "Day", "description": "1-7 = Mon-Sun, 8 = daily" },
-        "enabled": { "name": "Enable schedule", "description": "Only for scheduled reboot" }
+        "hour": {
+          "name": "Hour",
+          "description": "Omit for immediate reboot; 0-23"
+        },
+        "minute": {
+          "name": "Minute",
+          "description": "Omit for immediate reboot; 0-59"
+        },
+        "day": {
+          "name": "Day",
+          "description": "1-7 = Mon-Sun, 8 = daily"
+        },
+        "enabled": {
+          "name": "Enable schedule",
+          "description": "Only for scheduled reboot"
+        }
+      }
+    },
+    "reboot_ap": {
+      "name": "Reboot one AP",
+      "description": "Reboot only the specified AP; other APs and the AC are untouched (vendor cocmd channel, target selected by MAC).",
+      "fields": {
+        "mac": {
+          "name": "AP MAC",
+          "description": "Target AP MAC, e.g. aa:bb:cc:dd:ee:ff (or use name)"
+        },
+        "name": {
+          "name": "AP name",
+          "description": "Target AP display name (or use mac)"
+        }
+      }
+    },
+    "run_ap_command": {
+      "name": "Run command on one AP",
+      "description": "⚠️ Troubleshooting: run a shell command as root on the specified AP. Output goes to the HA log and a beeconmini_ap_command_result event.",
+      "fields": {
+        "mac": {
+          "name": "AP MAC",
+          "description": "Target AP MAC (or use name)"
+        },
+        "name": {
+          "name": "AP name",
+          "description": "Target AP display name (or use mac)"
+        },
+        "command": {
+          "name": "Command",
+          "description": "Single-line shell to run on that AP, e.g. logread | tail -30"
+        }
       }
     }
   },
   "sensor": {
-    "ap_channel": { "name": "Channel" },
-    "ap_power": { "name": "Power Level" },
-    "ap_clients": { "name": "Clients" },
-    "ap_port_speed": { "name": "Port Speed" },
-    "ap_uptime": { "name": "Uptime" },
-    "ap_ip": { "name": "IP Address" },
-    "ap_model": { "name": "Model" },
-    "ap_connected_clients": { "name": "Connected Clients" },
-    "reboot_ap": { "name": "Reboot AP" },
-    "kick_client": { "name": "Kick Client" },
-    "rssi": { "name": "Signal Strength" }
+    "ap_channel": {
+      "name": "Channel"
+    },
+    "ap_power": {
+      "name": "Power Level"
+    },
+    "ap_clients": {
+      "name": "Wireless Clients"
+    },
+    "ap_port_speed": {
+      "name": "Port Speed"
+    },
+    "ap_uptime": {
+      "name": "Uptime"
+    },
+    "ap_ip": {
+      "name": "IP Address"
+    },
+    "ap_model": {
+      "name": "Model"
+    },
+    "reboot_ap": {
+      "name": "Reboot all APs"
+    },
+    "kick_client": {
+      "name": "Kick Client"
+    },
+    "rssi": {
+      "name": "Signal Strength"
+    },
+    "client_band": {
+      "name": "Band"
+    },
+    "client_channel": {
+      "name": "Channel"
+    },
+    "client_phy": {
+      "name": "PHY Mode"
+    },
+    "client_tx": {
+      "name": "Tx Rate"
+    },
+    "client_rx": {
+      "name": "Rx Rate"
+    },
+    "client_ip": {
+      "name": "IP Address"
+    },
+    "client_mlo": {
+      "name": "MLO Multi-Link"
+    },
+    "reboot_this_ap": {
+      "name": "Reboot this AP"
+    }
   },
   "binary_sensor": {
-    "roaming_r24_eviction": { "name": "2.4G Client Eviction" },
-    "roaming_r5_eviction": { "name": "5G Client Eviction" }
+    "roaming_r24_eviction": {
+      "name": "2.4G Client Eviction"
+    },
+    "roaming_r5_eviction": {
+      "name": "5G Client Eviction"
+    }
   }
 }
