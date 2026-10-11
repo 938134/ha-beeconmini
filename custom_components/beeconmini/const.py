@@ -2,18 +2,31 @@
 
 ⚠️ 与设备协议相关的东西（端点、act 码、枚举表）**不在本模块**，
    一律见 :mod:`api.protocol`。
+
+版本号与集成名称：均从 manifest.json 读取（本文件为唯一权威来源，
+manifest.json 为运行时数据源）。CI 会校验（见 .github/workflows/release.yml）。
 """
 from __future__ import annotations
 
 import json
+import logging
 from pathlib import Path
 
-DOMAIN = "beeconmini"
-NAME = "BeeconMini 无线 AC"
+_LOGGER = logging.getLogger(__name__)
 
-# 版本号单一来源：manifest.json（HACS 以此识别版本，不再重复维护）
-with open(Path(__file__).parent / "manifest.json", "r", encoding="utf-8") as _f:
-    VERSION = json.load(_f)["version"]
+DOMAIN = "beeconmini"
+
+# ---- manifest.json 读取（VERSION 与 NAME 的唯一权威数据源）----
+_MANIFEST_PATH = Path(__file__).parent / "manifest.json"
+try:
+    with open(_MANIFEST_PATH, "r", encoding="utf-8") as _f:
+        _MANIFEST = json.load(_f)
+    VERSION = _MANIFEST.get("version", "0.0.0")
+    NAME = _MANIFEST.get("name", "BeeconMini AC")
+except (OSError, json.JSONDecodeError) as e:
+    _LOGGER.error("读取 manifest.json 失败: %s，使用默认值", e)
+    VERSION = "0.0.0"
+    NAME = "BeeconMini AC"
 
 # ---- 配置项 ----
 CONF_HOST = "host"

@@ -1,7 +1,12 @@
 # BeeconMini AC for Home Assistant
 
-![BeeconMini AC](brand/logo.png)
+[![HACS Custom](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://hacs.xyz/)
+[![Version](https://img.shields.io/badge/version-1.4.0-blue)]()
+[![HA](https://img.shields.io/badge/HA-2024.1%2B-orange)]()
 
+<p align="center">
+  <img src="custom_components/beeconmini/brand/icon.png" alt="BeeconMini AC" width="180" />
+</p>
 
 Home Assistant 集成：读取 BeeconMini 无线 AC（SEED AC1/AC2/AC3/AC5）的 AC 主机与纳管 AP 运行状态，并提供终端剔除、AP 重启两个域级服务。
 

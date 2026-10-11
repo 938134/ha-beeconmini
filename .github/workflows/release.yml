@@ -24,39 +24,45 @@ jobs:
           INTEGRATION_DIR="custom_components/${{ env.PACKAGE_NAME }}"
           echo "INTEGRATION_DIR=$INTEGRATION_DIR" >> $GITHUB_ENV
 
-      - name: 同步标签
+      - name: 校验 manifest.json 完整性
+        id: version
         run: |
-          git fetch --tags --force
-          echo "今日已有标签:"
-          git tag -l "v$(date +%Y%m%d)*" | sort -V || true
+          INTEGRATION_DIR="custom_components/${{ env.PACKAGE_NAME }}"
+          MANIFEST="$INTEGRATION_DIR/manifest.json"
+          VERSION=$(python3 -c "import json; print(json.load(open('$MANIFEST'))['version'])")
+          NAME=$(python3 -c "import json; print(json.load(open('$MANIFEST'))['name'])")
+          TAG="v${VERSION}"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "📌 manifest.json: name=$NAME, version=$VERSION → 标签: $TAG"
 
-      - name: 计算版本号
-        id: version_calc
+      - name: 校验版本号一致性（const.py ↔ manifest.json）
         run: |
-          export TZ=Asia/Shanghai
-          DATE_PATTERN="$(date +%Y%m%d)"
-          TAG_PREFIX="v${DATE_PATTERN}"
-
-          MAX_NUM=$(git tag -l "${TAG_PREFIX}*" | grep -oE '[0-9]{2}$' | sort -nr | head -1)
-          MAX_NUM=${MAX_NUM:-0}
-          NEXT_NUM=$((10#$MAX_NUM + 1))
-          NEW_VERSION="${TAG_PREFIX}$(printf '%02d' $NEXT_NUM)"
-
-          echo "新版本: $NEW_VERSION"
-          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
-          echo "tag_prefix=$TAG_PREFIX" >> $GITHUB_OUTPUT
+          python3 -c "
+          import json, sys
+          manifest = json.load(open('custom_components/${{ env.PACKAGE_NAME }}/manifest.json'))
+          version = manifest['version']
+          src = open('custom_components/${{ env.PACKAGE_NAME }}/const.py').read()
+          if 'manifest.json' not in src:
+              print('❌ const.py 未检测到 manifest.json 读取逻辑')
+              sys.exit(1)
+          if '.get(\"version\"' not in src and '.get(\"name\"' not in src:
+              print('⚠️  const.py 未检测到 .get(\"version\") 或 .get(\"name\") 调用')
+              sys.exit(1)
+          print(f'✅ manifest.json version={version}, const.py 已从 manifest 读取')
+          "
 
       - name: 清理已有发布
         if: always()
         continue-on-error: true
         run: |
-            if gh release view "${{ steps.version_calc.outputs.version }}" >/dev/null 2>&1; then
-              echo "发现同名发布，正在删除..."
-              gh release delete "${{ steps.version_calc.outputs.version }}" --cleanup-tag -y
-              echo "已删除同名发布"
-            else
-              echo "没有找到同名发布，跳过删除"
-            fi
+          if gh release view "${{ steps.version.outputs.tag }}" >/dev/null 2>&1; then
+            echo "发现同名发布，正在删除..."
+            gh release delete "${{ steps.version.outputs.tag }}" --cleanup-tag -y
+            echo "已删除同名发布"
+          else
+            echo "没有找到同名发布，跳过删除"
+          fi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -75,7 +81,7 @@ jobs:
             exit 1
           fi
 
-          echo "打包完成: ${{ env.ZIP_NAME }}"
+          echo "打包完成: ${env.ZIP_NAME}"
           ls -la "${{ env.ZIP_NAME }}"
 
       - name: 获取构建时间
@@ -84,34 +90,21 @@ jobs:
           BUILD_DATE=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
           echo "build_date=$BUILD_DATE" >> $GITHUB_OUTPUT
 
+      - name: 读取发布描述模板
+        run: |
+          sed -e "s|{{VERSION}}|${{ steps.version.outputs.tag }}|g" \
+              -e "s|{{BUILD_DATE}}|${{ steps.get_date.outputs.build_date }}|g" \
+              .github/release_body.md > /tmp/release_body.md
+          echo "📄 发布描述已生成"
+
       - name: 创建发布
         uses: ncipollo/release-action@v1
         with:
           artifacts: "${{ env.ZIP_NAME }}"
           token: ${{ secrets.GITHUB_TOKEN }}
-          tag: "${{ steps.version_calc.outputs.version }}"
-          name: "Release ${{ steps.version_calc.outputs.version }}"
-          body: |
-            ### 📡 BeeconMini 无线 AC
-
-            Home Assistant 集成：读取 BeeconMini 无线 AC（SEED AC1/AC2/AC3/AC5）的运行状态，支持终端剔除与 AP 重启。
-
-            **核心功能**
-            - 🖥️ AC 主机 8 项传感器：CPU 温度 / CPU 占用 / 内存 / 连接数 / 无线终端数 / 有线终端数 / WAN 收/发流量
-            - 📶 每台纳管 AP 3 项实体：在线状态、接入终端数、终端清单（含 RSSI / 信道 / 协议 / 速率 / MLO）
-            - ⚡ 并发刷新：`asyncio.gather` 一次刷新耗时 ≈ 单请求
-            - 🎯 两个域级服务：踢终端 `beeconmini.kick_client`、AP 重启 `beeconmini.reboot_aps`（立即/定时）
-            - 🔌 兼容 SEED AC1 / AC2 / AC3 / AC5（iStoreOS + beeconmini2-seed-* 插件）
-
-            **安装方式**
-            1. 下载 `beeconmini.zip`
-            2. 解压到 `custom_components/` 目录
-            3. 重启 Home Assistant
-            4. Settings → Devices & Services → Add Integration → 搜索 "BeeconMini"
-
-            **版本**
-            - 版本: ${{ steps.version_calc.outputs.version }}
-            - 构建日期: ${{ steps.get_date.outputs.build_date }}
+          tag: "${{ steps.version.outputs.tag }}"
+          name: "Release ${steps.version.outputs.tag}"
+          body-file: /tmp/release_body.md
           makeLatest: true
           skipIfReleaseExists: true
 
@@ -127,5 +120,5 @@ jobs:
         run: |
           echo "🎉 发布成功!"
           echo "📦 包名称: ${{ env.PACKAGE_NAME }}"
-          echo "🏷️ 版本号: ${{ steps.version_calc.outputs.version }}"
+          echo "🏷️ 版本号: ${{ steps.version.outputs.tag }}"
           echo "📁 文件: ${{ env.ZIP_NAME }}"
