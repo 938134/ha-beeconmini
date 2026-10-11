@@ -81,7 +81,7 @@ jobs:
             exit 1
           fi
 
-          echo "打包完成: ${env.ZIP_NAME}"
+          echo "打包完成: ${{ env.ZIP_NAME }}"
           ls -la "${{ env.ZIP_NAME }}"
 
       - name: 获取构建时间
