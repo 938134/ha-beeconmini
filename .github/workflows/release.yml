@@ -103,7 +103,7 @@ jobs:
           artifacts: "${{ env.ZIP_NAME }}"
           token: ${{ secrets.GITHUB_TOKEN }}
           tag: "${{ steps.version.outputs.tag }}"
-          name: "Release ${steps.version.outputs.tag}"
+          name: "Release ${{ steps.version.outputs.tag }}"
           body-file: /tmp/release_body.md
           makeLatest: true
           skipIfReleaseExists: true
